@@ -45,9 +45,24 @@ export const edgeKindSchema = z.enum([
   "produces",
 ]);
 
+function isPrivacySafeLocator(locator: string): boolean {
+  const normalized = locator.trim();
+  return !(
+    normalized.startsWith("/") ||
+    normalized.startsWith("~\\") ||
+    normalized.startsWith("~/") ||
+    normalized.startsWith("\\\\") ||
+    /^[a-z]:[\\/]/i.test(normalized) ||
+    /^file:/i.test(normalized)
+  );
+}
+
 export const provenanceSchema = z.object({
   adapter: z.string().min(1),
-  locator: z.string().min(1),
+  locator: z
+    .string()
+    .min(1)
+    .refine(isPrivacySafeLocator, "Locator must not expose an absolute path"),
   digest: z.string().min(1),
   contentCaptured: z.boolean().default(false),
 });
