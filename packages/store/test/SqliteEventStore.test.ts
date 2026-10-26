@@ -19,7 +19,9 @@ describe("SqliteEventStore", () => {
 
     expect(result.appended).toHaveLength(syntheticResearchEvents.length);
     expect(result.lastSequence).toBe(syntheticResearchEvents.length - 1);
-    expect(store.listEvents("run-synthetic-001", 14)).toHaveLength(3);
+    expect(store.listEvents("run-synthetic-001", 14)).toHaveLength(
+      syntheticResearchEvents.length - 15,
+    );
     expect(
       store.projectRun("run-synthetic-001")?.nodes.get("hypothesis-ws")?.status,
     ).toBe("refuted");

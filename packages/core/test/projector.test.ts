@@ -6,13 +6,14 @@ describe("research event projection", () => {
   it("reconstructs the current research state", () => {
     const projection = projectEvents(syntheticResearchEvents);
 
-    expect(projection.nodes.size).toBe(6);
-    expect(projection.edges.size).toBe(6);
+    expect(projection.nodes.size).toBe(14);
+    expect(projection.edges.size).toBe(17);
+    expect(projection.agents.size).toBe(6);
     expect(projection.nodes.get("hypothesis-ws")?.status).toBe("refuted");
     expect(projection.nodes.get("decision-event-log")?.status).toBe(
       "supported",
     );
-    expect(projection.edges.get("edge-e-h")).toEqual(
+    expect(projection.edges.get("edge-evidence-loss-hypothesis-ws")).toEqual(
       expect.objectContaining({
         source: "evidence-loss",
         target: "hypothesis-ws",
