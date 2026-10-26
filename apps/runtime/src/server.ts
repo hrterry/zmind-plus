@@ -137,10 +137,9 @@ export function createRuntime(options: CreateRuntimeOptions): FastifyInstance {
         ? headerCursor
         : (request.query.after ?? "-1");
     const after = Number.parseInt(cursorValue, 10);
-    const replay = options.store.listEvents(
+    const replay = options.store.listAllEvents(
       request.params.runId,
       Number.isFinite(after) ? after : -1,
-      10_000,
     );
 
     reply.hijack();

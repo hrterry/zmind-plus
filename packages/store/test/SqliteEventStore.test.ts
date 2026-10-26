@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { syntheticResearchEvents } from "@zmind-plus/core";
+import {
+  generateScaleResearchEvents,
+  syntheticResearchEvents,
+} from "@zmind-plus/core";
 
 import {
   EventConflictError,
@@ -70,6 +73,20 @@ describe("SqliteEventStore", () => {
     ).toThrow(EventSequenceError);
     expect(store.listRuns()).toHaveLength(0);
     expect(store.listEvents("run-synthetic-001")).toHaveLength(0);
+    store.close();
+  });
+
+  it("projects a run larger than one internal replay page", () => {
+    const store = createStore();
+    const events = generateScaleResearchEvents({ nodeCount: 5_100 });
+
+    for (let offset = 0; offset < events.length; offset += 500) {
+      store.appendBatch(events.slice(offset, offset + 500));
+    }
+
+    expect(events.length).toBeGreaterThan(10_000);
+    expect(store.listAllEvents("run-scale-5100")).toHaveLength(events.length);
+    expect(store.projectRun("run-scale-5100")?.nodes.size).toBe(5_100);
     store.close();
   });
 });

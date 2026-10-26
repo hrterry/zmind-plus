@@ -11,6 +11,7 @@ export type ConnectionMode = "connecting" | "live" | "reconnecting" | "demo";
 interface RunSummary {
   id: string;
   updatedAt: string;
+  lastSequence: number;
 }
 
 interface RunsResponse {
@@ -30,6 +31,41 @@ export function mergeResearchEvents(
   return [...byId.values()].sort(
     (left, right) => left.sequence - right.sequence,
   );
+}
+
+export async function fetchResearchEventHistory(
+  runId: string,
+  lastSequence: number,
+  signal: AbortSignal,
+  fetcher: typeof fetch = fetch,
+): Promise<ResearchEvent[]> {
+  const events: ResearchEvent[] = [];
+  let after = -1;
+
+  while (after < lastSequence) {
+    const response = await fetcher(
+      `/api/runs/${encodeURIComponent(runId)}/events?after=${after}&limit=1000`,
+      { signal },
+    );
+    if (!response.ok) throw new Error("Runtime event replay is unavailable");
+    const payload = (await response.json()) as EventsResponse;
+    const page = payload.events.map((event) =>
+      researchEventSchema.parse(event),
+    );
+    if (page.length === 0) {
+      throw new Error("Runtime event replay ended before the run cursor");
+    }
+
+    for (const event of page) {
+      if (event.runId !== runId || event.sequence !== after + 1) {
+        throw new Error("Runtime event replay is not contiguous");
+      }
+      events.push(event);
+      after = event.sequence;
+    }
+  }
+
+  return events;
 }
 
 export function useResearchRun() {
@@ -59,14 +95,10 @@ export function useResearchRun() {
           return;
         }
 
-        const eventsResponse = await fetch(`/api/runs/${latest.id}/events`, {
-          signal: controller.signal,
-        });
-        if (!eventsResponse.ok)
-          throw new Error("Runtime event replay is unavailable");
-        const payload = (await eventsResponse.json()) as EventsResponse;
-        const replay = payload.events.map((event) =>
-          researchEventSchema.parse(event),
+        const replay = await fetchResearchEventHistory(
+          latest.id,
+          latest.lastSequence,
+          controller.signal,
         );
         setEvents(replay);
         setMode("live");

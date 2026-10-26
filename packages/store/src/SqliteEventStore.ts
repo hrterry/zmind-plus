@@ -239,6 +239,25 @@ export class SqliteEventStore {
     );
   }
 
+  listAllEvents(runId: string, after = -1, pageSize = 10_000): ResearchEvent[] {
+    const events: ResearchEvent[] = [];
+    let cursor = after;
+
+    while (true) {
+      const page = this.listEvents(runId, cursor, pageSize);
+      if (page.length === 0) break;
+      events.push(...page);
+      const nextCursor = page.at(-1)!.sequence;
+      if (nextCursor <= cursor) {
+        throw new EventStoreError("Event replay cursor did not advance");
+      }
+      cursor = nextCursor;
+      if (page.length < Math.min(Math.max(1, pageSize), 10_000)) break;
+    }
+
+    return events;
+  }
+
   listRuns(): StoredRun[] {
     return (this.#listRuns.all() as unknown as RunRow[]).map((row) => ({
       id: row.id,
@@ -251,7 +270,7 @@ export class SqliteEventStore {
   }
 
   projectRun(runId: string): ResearchProjection | undefined {
-    const events = this.listEvents(runId, -1, 10_000);
+    const events = this.listAllEvents(runId);
     return events.length === 0 ? undefined : projectEvents(events);
   }
 

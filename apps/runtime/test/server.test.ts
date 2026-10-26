@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { syntheticResearchEvents } from "@zmind-plus/core";
+import {
+  generateScaleResearchEvents,
+  syntheticResearchEvents,
+} from "@zmind-plus/core";
 import { SqliteEventStore } from "@zmind-plus/store";
 
 import { createRuntime } from "../src/server";
@@ -75,5 +78,26 @@ describe("local runtime API", () => {
     });
 
     expect(response.statusCode).toBe(403);
+  });
+
+  it("projects and catches up beyond the internal replay page", async () => {
+    const events = generateScaleResearchEvents({ nodeCount: 5_100 });
+    for (let offset = 0; offset < events.length; offset += 500) {
+      store.appendBatch(events.slice(offset, offset + 500));
+    }
+
+    const projection = await app.inject({
+      method: "GET",
+      url: "/api/runs/run-scale-5100/projection",
+    });
+    expect(projection.statusCode).toBe(200);
+    expect(projection.json().nodes).toHaveLength(5_100);
+
+    const replay = await app.inject({
+      method: "GET",
+      url: "/api/runs/run-scale-5100/stream?after=9998&follow=false",
+    });
+    expect(replay.statusCode).toBe(200);
+    expect(replay.body).toContain(`id: ${events.length - 1}`);
   });
 });
