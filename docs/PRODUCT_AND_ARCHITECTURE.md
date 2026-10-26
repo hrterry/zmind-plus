@@ -131,19 +131,19 @@ storage interface must permit PostgreSQL later without changing event semantics.
 
 ## 5. Technology decisions
 
-| Concern | Decision | Reason |
-|---|---|---|
-| Language | TypeScript, strict | One schema across adapters, server, and UI |
-| Runtime | Active Node.js LTS/current | Portable local daemon and broad ecosystem |
-| UI | React + Vite | Fast local startup without framework server coupling |
-| Styling | Tailwind CSS + CSS variables | Rapid iteration with explicit visual tokens |
-| Validation | Zod | Runtime validation at every trust boundary |
-| Storage | SQLite first | Zero-configuration, durable local deployment |
-| Live updates | SSE initially | Reconnectable one-way event stream; commands remain HTTP |
-| Graph | Cytoscape.js pilot | Mature interactions and compound graph support |
-| Large graph fallback | Sigma.js adapter | WebGL path if scale tests exceed canvas budget |
-| Interop | OpenTelemetry-compatible adapter | Accept existing instrumentation without adopting spans as the domain model |
-| Tests | Vitest + Playwright | Fast domain tests and real interaction coverage |
+| Concern              | Decision                         | Reason                                                                     |
+| -------------------- | -------------------------------- | -------------------------------------------------------------------------- |
+| Language             | TypeScript, strict               | One schema across adapters, server, and UI                                 |
+| Runtime              | Active Node.js LTS/current       | Portable local daemon and broad ecosystem                                  |
+| UI                   | React + Vite                     | Fast local startup without framework server coupling                       |
+| Styling              | Tailwind CSS + CSS variables     | Rapid iteration with explicit visual tokens                                |
+| Validation           | Zod                              | Runtime validation at every trust boundary                                 |
+| Storage              | SQLite first                     | Zero-configuration, durable local deployment                               |
+| Live updates         | SSE initially                    | Reconnectable one-way event stream; commands remain HTTP                   |
+| Graph                | Cytoscape.js pilot               | Mature interactions and compound graph support                             |
+| Large graph fallback | Sigma.js adapter                 | WebGL path if scale tests exceed canvas budget                             |
+| Interop              | OpenTelemetry-compatible adapter | Accept existing instrumentation without adopting spans as the domain model |
+| Tests                | Vitest + Playwright              | Fast domain tests and real interaction coverage                            |
 
 The renderer decision is evidence-gated. Cytoscape.js supports compound graphs
 needed for collapsible workstreams, but compound nodes carry a performance cost.
@@ -217,4 +217,3 @@ flowchart TD
 - Raw content capture is off by default.
 - The application works without an account, API key, or cloud service.
 - No private or project-specific data exists anywhere in repository history.
-

@@ -50,4 +50,3 @@ See [Product and architecture](docs/PRODUCT_AND_ARCHITECTURE.md) and
 ## License
 
 [MIT](LICENSE)
-
