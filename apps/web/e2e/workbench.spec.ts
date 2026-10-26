@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("loads the real graph and keeps branch navigation understandable", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/workbench");
 
   const canvas = page.getByLabel("Research graph showing 14 of 14 nodes");
   await expect(canvas).toBeVisible();
