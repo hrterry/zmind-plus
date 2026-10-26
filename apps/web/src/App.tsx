@@ -137,7 +137,11 @@ function Inspector({
         <div className="provenance-card">
           <span>Source metadata</span>
           <strong>{node.provenance.locator}</strong>
-          <small>Content remains local and was not captured.</small>
+          <small>
+            {node.provenance.contentCaptured
+              ? "Structured content was explicitly recorded and remains local."
+              : "Content remains local and was not captured."}
+          </small>
         </div>
       </section>
 

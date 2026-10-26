@@ -40,6 +40,7 @@ sequenceDiagram
 ## Tool contract
 
 - `start_research`: begins a named run and creates its root question.
+- `attach_latest_research`: joins the latest run created by lifecycle hooks.
 - `record_finding`: creates or updates one typed node and returns its stable ID.
 - `connect_findings`: records an evidence, challenge, test, dependency, or
   decomposition relationship between existing nodes.

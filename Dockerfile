@@ -8,6 +8,7 @@ COPY apps/runtime/package.json apps/runtime/package.json
 COPY apps/web/package.json apps/web/package.json
 COPY packages/adapter-claude-code/package.json packages/adapter-claude-code/package.json
 COPY packages/core/package.json packages/core/package.json
+COPY packages/mcp-server/package.json packages/mcp-server/package.json
 COPY packages/sdk/package.json packages/sdk/package.json
 COPY packages/store/package.json packages/store/package.json
 RUN npm ci

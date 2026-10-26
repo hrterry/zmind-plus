@@ -108,6 +108,22 @@ inputs, and tool outputs before contacting the loopback runtime.
 See the [adapter instructions](packages/adapter-claude-code/README.md) and
 [privacy and event-mapping plan](docs/CLAUDE_CODE_ADAPTER_PLAN.md).
 
+### Record the semantic research map
+
+Lifecycle hooks show activity without reading content. To let Claude or another
+MCP host explicitly record questions, critiques, experiments, evidence, and
+decisions, connect the local MCP recorder:
+
+```bash
+npm run build --workspace=@zmind-plus/mcp-server
+npm link ./packages/mcp-server
+claude mcp add zmind-plus -- zmind-mcp
+```
+
+The recorder uses the official MCP TypeScript SDK v2. It exposes six focused
+tools and writes only the structured content deliberately supplied to those
+tools. See the [MCP recorder instructions](packages/mcp-server/README.md).
+
 ### Self-host with Docker
 
 ```bash
