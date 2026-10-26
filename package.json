@@ -10,7 +10,9 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "dev": "npm run dev --workspace=@zmind-plus/web",
+    "dev": "concurrently --kill-others --names runtime,web --prefix-colors blue,magenta \"npm run dev --workspace=@zmind-plus/runtime\" \"npm run dev --workspace=@zmind-plus/web\"",
+    "dev:runtime": "npm run dev --workspace=@zmind-plus/runtime",
+    "dev:web": "npm run dev --workspace=@zmind-plus/web",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run test --workspaces --if-present",
@@ -20,6 +22,7 @@
     "node": ">=24.0.0"
   },
   "devDependencies": {
+    "concurrently": "10.0.6",
     "prettier": "3.9.10",
     "typescript": "7.0.2",
     "vitest": "5.0.5"
