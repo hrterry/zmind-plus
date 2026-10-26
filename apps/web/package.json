@@ -6,8 +6,9 @@
   "scripts": {
     "build": "tsc -b && vite build",
     "dev": "vite",
+    "test:e2e": "playwright test",
     "typecheck": "tsc -b",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run src --passWithNoTests"
   },
   "dependencies": {
     "@zmind-plus/core": "*",
@@ -16,6 +17,7 @@
     "react-dom": "19.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.1",
     "@tailwindcss/vite": "4.3.3",
     "@types/react": "19.2.11",
     "@types/react-dom": "19.2.3",

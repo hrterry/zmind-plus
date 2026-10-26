@@ -45,7 +45,9 @@ workbench backed by a typed event protocol and a synthetic multi-agent research
 scenario.
 
 See [Product and architecture](docs/PRODUCT_AND_ARCHITECTURE.md) and
-[Research notes](docs/RESEARCH_NOTES.md).
+[Research notes](docs/RESEARCH_NOTES.md). The progressive-disclosure strategy
+and scale budgets are documented in
+[Graph scale plan](docs/GRAPH_SCALE_PLAN.md).
 
 ## Run the workbench
 
@@ -77,8 +79,15 @@ Quality checks:
 npm run format:check
 npm run typecheck
 npm test
+npm run benchmark:graph
+npx playwright install chromium
+npm run test:e2e
 npm run build
 ```
+
+The graph benchmark generates provider-neutral corpora at 1k, 5k, and 20k
+nodes. Browser binaries are cached on the development machine and are never
+committed to the repository.
 
 ## License
 
