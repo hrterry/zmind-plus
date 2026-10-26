@@ -110,3 +110,19 @@ without introducing flaky wall-clock test failures.
 - A cycle or malformed topology cannot hang the planner.
 - Format, typecheck, tests, production build, and repository boundary scan all
   pass before each phase is pushed.
+
+## First measured baseline
+
+Measured on 2026-10-26 with Node.js 24.15.0 on Linux x86_64. Timings are a
+single local development run and should be treated as a regression baseline,
+not a cross-machine guarantee.
+
+|  Nodes | Events | Projection | Visibility plan | Heap delta | Initial view |
+| -----: | -----: | ---------: | --------------: | ---------: | -----------: |
+|  1,000 |  2,000 |    24.1 ms |          3.2 ms |    2.3 MiB |            9 |
+|  5,000 | 10,000 |    70.5 ms |         16.6 ms |    2.6 MiB |            9 |
+| 20,000 | 40,000 |   184.8 ms |         52.9 ms |   24.2 MiB |            9 |
+
+All three corpora stayed inside the Phase A budgets. The visibility planner is
+cycle-safe and deterministic, and explicit branch expansion reveals the next
+level without modifying the complete projection.

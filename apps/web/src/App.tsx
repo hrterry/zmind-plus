@@ -1,7 +1,9 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 
 import {
+  createGraphView,
   projectEvents,
+  type GraphViewNode,
   type ResearchEvent,
   type ResearchNode,
 } from "@zmind-plus/core";
@@ -49,7 +51,15 @@ function eventLabel(event: ResearchEvent): string {
   }
 }
 
-function Inspector({ node }: { node: ResearchNode | undefined }) {
+function Inspector({
+  node,
+  viewNode,
+  onToggle,
+}: {
+  node: ResearchNode | undefined;
+  viewNode: GraphViewNode | undefined;
+  onToggle: (nodeId: string, isCollapsed: boolean) => void;
+}) {
   if (node === undefined) {
     return (
       <div className="empty-inspector">
@@ -71,6 +81,19 @@ function Inspector({ node }: { node: ResearchNode | undefined }) {
       </div>
       <h2>{node.title}</h2>
       <p className="node-summary">{node.summary}</p>
+
+      {viewNode?.hasChildren === true && (
+        <button
+          className="branch-button"
+          type="button"
+          onClick={() => onToggle(node.id, viewNode.isCollapsed)}
+        >
+          <span>{viewNode.isCollapsed ? "+" : "−"}</span>
+          {viewNode.isCollapsed
+            ? `Show ${viewNode.hiddenDescendantCount} related nodes`
+            : "Fold related nodes"}
+        </button>
+      )}
 
       {node.confidence !== undefined && (
         <section className="detail-section">
@@ -110,6 +133,12 @@ export function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedId, setSelectedId] = useState("decision-event-log");
   const [query, setQuery] = useState("");
+  const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const [collapsedNodeIds, setCollapsedNodeIds] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const visibleEvents = useMemo(
     () => events.slice(0, visibleCount),
@@ -119,12 +148,45 @@ export function App() {
     () => projectEvents(visibleEvents),
     [visibleEvents],
   );
+  const revealNodeIds = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (normalized.length === 0) return new Set<string>();
+    return new Set(
+      [...projection.nodes.values()]
+        .filter(
+          (node) =>
+            node.title.toLowerCase().includes(normalized) ||
+            node.summary.toLowerCase().includes(normalized) ||
+            node.kind.includes(normalized),
+        )
+        .map((node) => node.id),
+    );
+  }, [projection, query]);
+  const graphView = useMemo(
+    () =>
+      createGraphView(projection, {
+        defaultExpandedDepth: projection.nodes.size > 120 ? 1 : Infinity,
+        expandedNodeIds,
+        collapsedNodeIds,
+        revealNodeIds,
+      }),
+    [collapsedNodeIds, expandedNodeIds, projection, revealNodeIds],
+  );
+  const graphViewById = useMemo(
+    () => new Map(graphView.nodes.map((entry) => [entry.node.id, entry])),
+    [graphView],
+  );
   const selectedNode = projection.nodes.get(selectedId);
   const activeAgents = [...projection.agents.values()];
 
   useEffect(() => {
     if (!isPlaying) setVisibleCount(events.length);
   }, [events.length, isPlaying]);
+
+  useEffect(() => {
+    setExpandedNodeIds(new Set());
+    setCollapsedNodeIds(new Set());
+  }, [projection.runId]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -143,6 +205,25 @@ export function App() {
     setSelectedId("question-root");
     setVisibleCount(Math.min(2, events.length));
     setIsPlaying(true);
+  }
+
+  function toggleBranch(nodeId: string, isCollapsed: boolean) {
+    if (isCollapsed) {
+      setCollapsedNodeIds((current) => {
+        const next = new Set(current);
+        next.delete(nodeId);
+        return next;
+      });
+      setExpandedNodeIds((current) => new Set(current).add(nodeId));
+      return;
+    }
+
+    setExpandedNodeIds((current) => {
+      const next = new Set(current);
+      next.delete(nodeId);
+      return next;
+    });
+    setCollapsedNodeIds((current) => new Set(current).add(nodeId));
   }
 
   const connectionLabel = {
@@ -242,6 +323,12 @@ export function App() {
               <strong>
                 {projection.objective ?? "Waiting for the objective"}
               </strong>
+              <span className="graph-count">
+                {graphView.nodes.length} visible
+                {graphView.hiddenNodeCount > 0
+                  ? ` · ${graphView.hiddenNodeCount} folded`
+                  : " · complete view"}
+              </span>
             </div>
             <label className="search-box">
               <span>⌕</span>
@@ -265,10 +352,11 @@ export function App() {
               }
             >
               <GraphCanvas
-                projection={projection}
+                view={graphView}
                 query={query}
                 selectedId={selectedId}
                 onSelect={setSelectedId}
+                onToggle={toggleBranch}
               />
             </Suspense>
             <div className="graph-legend">
@@ -281,6 +369,7 @@ export function App() {
               <span>
                 <i className="legend-line" /> Challenge / refute
               </span>
+              <span className="legend-fold">Double border = folded branch</span>
             </div>
             <div className="zoom-hint">Scroll to zoom · drag to explore</div>
           </div>
@@ -300,7 +389,11 @@ export function App() {
               ×
             </button>
           </div>
-          <Inspector node={selectedNode} />
+          <Inspector
+            node={selectedNode}
+            viewNode={graphViewById.get(selectedId)}
+            onToggle={toggleBranch}
+          />
         </aside>
       </div>
 

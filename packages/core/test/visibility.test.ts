@@ -61,6 +61,13 @@ describe("progressive graph visibility", () => {
     expect(first.edges.map((edge) => edge.id)).toEqual(
       second.edges.map((edge) => edge.id),
     );
+
+    const expanded = createGraphView(projection, {
+      defaultExpandedDepth: 1,
+      expandedNodeIds: new Set(["node-001"]),
+    });
+    expect(expanded.nodes.length).toBeGreaterThan(first.nodes.length);
+    expect(expanded.hiddenNodeCount).toBeLessThan(first.hiddenNodeCount);
   });
 
   it("turns a cyclic component into a finite display tree", () => {

@@ -1,13 +1,14 @@
 import cytoscape, { type Core, type ElementDefinition } from "cytoscape";
 import { useEffect, useRef } from "react";
 
-import type { ResearchProjection } from "@zmind-plus/core";
+import type { GraphView } from "@zmind-plus/core";
 
 interface GraphCanvasProps {
-  projection: ResearchProjection;
+  view: GraphView;
   query: string;
   selectedId?: string;
   onSelect: (nodeId: string) => void;
+  onToggle: (nodeId: string, isCollapsed: boolean) => void;
 }
 
 const kindColors: Record<string, string> = {
@@ -23,51 +24,66 @@ const kindColors: Record<string, string> = {
   artifact: "#eef1f4",
 };
 
-function elementsFor(projection: ResearchProjection): ElementDefinition[] {
-  const nodes: ElementDefinition[] = [...projection.nodes.values()].map(
-    (node) => ({
+function elementsFor(view: GraphView): ElementDefinition[] {
+  const nodes: ElementDefinition[] = view.nodes.map(
+    ({ node, hasChildren, isCollapsed, hiddenDescendantCount }) => ({
       data: {
         id: node.id,
-        label: node.title,
+        label: isCollapsed
+          ? `${node.title}\n+${hiddenDescendantCount} hidden`
+          : node.title,
+        summary: node.summary,
         kind: node.kind,
         status: node.status,
         color: kindColors[node.kind] ?? "#eef1f4",
+        hasChildren,
+        isCollapsed,
       },
     }),
   );
 
-  const edges: ElementDefinition[] = [...projection.edges.values()].map(
-    (edge) => ({
-      data: {
-        id: edge.id,
-        source: edge.source,
-        target: edge.target,
-        kind: edge.kind,
-      },
-    }),
-  );
+  const edges: ElementDefinition[] = view.edges.map((edge) => ({
+    data: {
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      kind: edge.kind,
+    },
+  }));
 
   return [...nodes, ...edges];
 }
 
 export function GraphCanvas({
-  projection,
+  view,
   query,
   selectedId,
   onSelect,
+  onToggle,
 }: GraphCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<Core | null>(null);
   const onSelectRef = useRef(onSelect);
+  const onToggleRef = useRef(onToggle);
 
   onSelectRef.current = onSelect;
+  onToggleRef.current = onToggle;
+
+  function activateNode(
+    nodeId: string,
+    hasChildren: boolean,
+    isCollapsed: boolean,
+  ) {
+    onSelect(nodeId);
+    if (hasChildren) onToggle(nodeId, isCollapsed);
+  }
 
   useEffect(() => {
     if (containerRef.current === null) return;
 
     const graph = cytoscape({
       container: containerRef.current,
-      elements: elementsFor(projection),
+      elements: elementsFor(view),
       minZoom: 0.35,
       maxZoom: 2.2,
       pixelRatio: 1,
@@ -108,6 +124,14 @@ export function GraphCanvas({
           style: {
             "border-color": "#6d5ce7",
             "border-width": 2,
+          },
+        },
+        {
+          selector: "node[?isCollapsed]",
+          style: {
+            "border-color": "#6d5ce7",
+            "border-style": "double",
+            "border-width": 4,
           },
         },
         {
@@ -160,7 +184,11 @@ export function GraphCanvas({
     });
 
     graph.on("tap", "node", (event) => {
-      onSelectRef.current(event.target.id());
+      const nodeId = event.target.id();
+      const hasChildren = event.target.data("hasChildren") === true;
+      const isCollapsed = event.target.data("isCollapsed") === true;
+      onSelectRef.current(nodeId);
+      if (hasChildren) onToggleRef.current(nodeId, isCollapsed);
     });
 
     graphRef.current = graph;
@@ -169,7 +197,7 @@ export function GraphCanvas({
       graph.destroy();
       graphRef.current = null;
     };
-  }, [projection]);
+  }, [view]);
 
   useEffect(() => {
     const graph = graphRef.current;
@@ -186,8 +214,13 @@ export function GraphCanvas({
     if (normalized.length > 0) {
       const matches = graph.nodes().filter((node) => {
         const label = String(node.data("label")).toLowerCase();
+        const summary = String(node.data("summary")).toLowerCase();
         const kind = String(node.data("kind")).toLowerCase();
-        return label.includes(normalized) || kind.includes(normalized);
+        return (
+          label.includes(normalized) ||
+          summary.includes(normalized) ||
+          kind.includes(normalized)
+        );
       });
       graph.elements().addClass("dimmed");
       matches.removeClass("dimmed").addClass("matched");
@@ -197,10 +230,26 @@ export function GraphCanvas({
   }, [query, selectedId]);
 
   return (
-    <div
-      className="graph-canvas"
-      ref={containerRef}
-      aria-label="Research graph"
-    />
+    <>
+      <div
+        className="graph-canvas"
+        ref={containerRef}
+        aria-label={`Research graph showing ${view.nodes.length} of ${view.totalNodeCount} nodes`}
+      />
+      <nav className="graph-keyboard-nav" aria-label="Visible research nodes">
+        <span>Keyboard graph controls</span>
+        {view.nodes.map(({ node, hasChildren, isCollapsed }) => (
+          <button
+            key={node.id}
+            type="button"
+            onClick={() => activateNode(node.id, hasChildren, isCollapsed)}
+          >
+            {hasChildren
+              ? `${isCollapsed ? "Expand" : "Fold"} branch: ${node.title}`
+              : `Inspect: ${node.title}`}
+          </button>
+        ))}
+      </nav>
+    </>
   );
 }
