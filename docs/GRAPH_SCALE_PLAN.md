@@ -59,7 +59,8 @@ a stable display hierarchy without pretending that cross-links do not exist.
 - Roots are nodes with no incoming edge. If a cyclic component has no root,
   its lexically first node becomes a display root.
 - The first incoming structural edge in stable order is the display parent.
-- `decomposes`, `proposes`, `tests`, and `produces` are structural edges.
+- `decomposes`, `proposes`, `challenges`, `tests`, and `produces` are
+  structural edges.
 - Challenge, support, refutation, contradiction, dependency, and supersession
   remain cross-links.
 - Traversal is cycle-safe and ordered by node id as a final tie-breaker.

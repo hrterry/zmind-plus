@@ -9,6 +9,7 @@
     "packages/*"
   ],
   "scripts": {
+    "benchmark:graph": "npm run benchmark:graph --workspace=@zmind-plus/core",
     "build": "npm run build --workspaces --if-present",
     "dev": "concurrently --kill-others --names runtime,web --prefix-colors blue,magenta \"npm run dev --workspace=@zmind-plus/runtime\" \"npm run dev --workspace=@zmind-plus/web\"",
     "dev:runtime": "npm run dev --workspace=@zmind-plus/runtime",
