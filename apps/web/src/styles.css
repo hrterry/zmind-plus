@@ -192,6 +192,11 @@ button {
   background: #f2dd87;
 }
 
+.attention-bar button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
 .workspace-grid {
   display: grid;
   grid-template-columns: minmax(220px, 0.72fr) minmax(500px, 2.25fr) minmax(
@@ -742,6 +747,118 @@ button {
   color: white;
   background: #6d5ce7;
   box-shadow: 0 7px 16px rgba(109, 92, 231, 0.2);
+}
+
+.grounded-answer {
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid #ded9ff;
+  border-radius: 10px;
+  background: #f8f7ff;
+}
+
+.grounded-answer > span {
+  color: #6555d8;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.grounded-answer > strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 11px;
+}
+
+.grounded-answer > p {
+  margin: 7px 0;
+  color: #67727e;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.grounded-answer ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grounded-answer li {
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  gap: 3px 8px;
+  padding: 8px;
+  border: 1px solid #e2e5e9;
+  border-radius: 7px;
+  background: white;
+}
+
+.grounded-answer li > span {
+  color: #e06c60;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.grounded-answer li > strong {
+  overflow: hidden;
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grounded-answer li > small {
+  grid-column: 2;
+  color: #87919c;
+  font-size: 7px;
+}
+
+.grounded-answer > small {
+  display: block;
+  color: #7a858f;
+  font-size: 7px;
+  line-height: 1.45;
+}
+
+.grounded-answer form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.grounded-answer input {
+  min-width: 0;
+  border: 1px solid #dfe2e7;
+  border-radius: 7px;
+  padding: 8px;
+  background: white;
+  font-size: 9px;
+  outline: 0;
+}
+
+.grounded-answer input:focus {
+  border-color: #6d5ce7;
+  box-shadow: 0 0 0 2px rgba(109, 92, 231, 0.1);
+}
+
+.grounded-answer form button {
+  border: 0;
+  border-radius: 7px;
+  padding: 0 10px;
+  color: white;
+  background: #17212b;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.grounded-answer form button:disabled {
+  cursor: default;
+  opacity: 0.35;
 }
 
 .empty-inspector {

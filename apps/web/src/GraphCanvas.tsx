@@ -6,7 +6,7 @@ import type { GraphView } from "@zmind-plus/core";
 interface GraphCanvasProps {
   view: GraphView;
   query: string;
-  selectedId?: string;
+  selectedId: string | undefined;
   onSelect: (nodeId: string) => void;
   onToggle: (nodeId: string, isCollapsed: boolean) => void;
 }

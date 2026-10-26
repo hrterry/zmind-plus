@@ -8,6 +8,30 @@ test("loads the real graph and keeps branch navigation understandable", async ({
   const canvas = page.getByLabel("Research graph showing 14 of 14 nodes");
   await expect(canvas).toBeVisible();
   await expect(page.getByText("14 visible · complete view")).toBeVisible();
+  await expect(page.getByRole("button", { name: "New inquiry" })).toHaveCount(
+    0,
+  );
+
+  await page.getByRole("button", { name: "Review decision" }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Use an append-only event log with a live delivery channel",
+    }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Ask why this is current" }).click();
+  await expect(page.getByText("Evidence-linked answer")).toBeVisible();
+  await expect(page.getByText("2 direct graph relationships")).toBeVisible();
+  await page
+    .getByLabel("Ask a follow-up about this node")
+    .fill("Which experiment changed this decision?");
+  await page.getByRole("button", { name: "Ask", exact: true }).click();
+  await expect(
+    page.getByText("Which experiment changed this decision?"),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Close inspector" }).click();
+  await expect(
+    page.getByText("Select a node to inspect its evidence and history."),
+  ).toBeVisible();
 
   const foldRoot = page.getByRole("button", {
     name: "Fold branch: Which transport should coordinate live edits?",

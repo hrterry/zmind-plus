@@ -4,6 +4,7 @@ import {
   createGraphView,
   projectEvents,
   type GraphViewNode,
+  type ResearchEdge,
   type ResearchEvent,
   type ResearchNode,
 } from "@zmind-plus/core";
@@ -36,6 +37,12 @@ const kindLabel: Record<string, string> = {
   artifact: "Artifact",
 };
 
+interface RelatedNode {
+  direction: "incoming" | "outgoing";
+  edge: ResearchEdge;
+  node: ResearchNode;
+}
+
 function eventLabel(event: ResearchEvent): string {
   switch (event.type) {
     case "run.started":
@@ -54,12 +61,17 @@ function eventLabel(event: ResearchEvent): string {
 function Inspector({
   node,
   viewNode,
+  relatedNodes,
   onToggle,
 }: {
   node: ResearchNode | undefined;
   viewNode: GraphViewNode | undefined;
+  relatedNodes: RelatedNode[];
   onToggle: (nodeId: string, isCollapsed: boolean) => void;
 }) {
+  const [question, setQuestion] = useState("");
+  const [askedQuestion, setAskedQuestion] = useState<string>();
+
   if (node === undefined) {
     return (
       <div className="empty-inspector">
@@ -117,11 +129,65 @@ function Inspector({
       </section>
 
       <section className="detail-section">
-        <span className="detail-label">Continue the inquiry</span>
-        <button className="ask-button" type="button">
-          Ask why this is current
-          <span>↗</span>
-        </button>
+        <span className="detail-label">Question the conclusion</span>
+        {askedQuestion === undefined ? (
+          <button
+            className="ask-button"
+            type="button"
+            onClick={() => setAskedQuestion("Why is this current?")}
+          >
+            Ask why this is current
+            <span>↗</span>
+          </button>
+        ) : (
+          <div className="grounded-answer">
+            <span>Evidence-linked answer</span>
+            <strong>{askedQuestion}</strong>
+            <p>
+              This node has {relatedNodes.length} direct graph relationship
+              {relatedNodes.length === 1 ? "" : "s"} in the current record.
+            </p>
+            {relatedNodes.length > 0 ? (
+              <ul>
+                {relatedNodes.map((related) => (
+                  <li key={related.edge.id}>
+                    <span>{related.edge.kind.replace("_", " ")}</span>
+                    <strong>{related.node.title}</strong>
+                    <small>
+                      {related.direction} · {related.node.status}
+                    </small>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No direct evidence relationship has been recorded yet.</p>
+            )}
+            <small>
+              Derived locally from recorded relationships. No question text was
+              uploaded.
+            </small>
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                const nextQuestion = question.trim();
+                if (nextQuestion.length > 0) {
+                  setAskedQuestion(nextQuestion);
+                  setQuestion("");
+                }
+              }}
+            >
+              <input
+                value={question}
+                onChange={(event) => setQuestion(event.target.value)}
+                placeholder="Ask a follow-up…"
+                aria-label="Ask a follow-up about this node"
+              />
+              <button type="submit" disabled={question.trim().length === 0}>
+                Ask
+              </button>
+            </form>
+          </div>
+        )}
       </section>
     </div>
   );
@@ -131,7 +197,9 @@ export function App() {
   const { events, mode } = useResearchRun();
   const [visibleCount, setVisibleCount] = useState(events.length);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [selectedId, setSelectedId] = useState("decision-event-log");
+  const [selectedId, setSelectedId] = useState<string | undefined>(
+    "decision-event-log",
+  );
   const [query, setQuery] = useState("");
   const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(
     () => new Set(),
@@ -150,18 +218,21 @@ export function App() {
   );
   const revealNodeIds = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (normalized.length === 0) return new Set<string>();
-    return new Set(
-      [...projection.nodes.values()]
-        .filter(
-          (node) =>
-            node.title.toLowerCase().includes(normalized) ||
-            node.summary.toLowerCase().includes(normalized) ||
-            node.kind.includes(normalized),
-        )
-        .map((node) => node.id),
-    );
-  }, [projection, query]);
+    const revealed = new Set<string>();
+    if (selectedId !== undefined) revealed.add(selectedId);
+    if (normalized.length > 0) {
+      for (const node of projection.nodes.values()) {
+        if (
+          node.title.toLowerCase().includes(normalized) ||
+          node.summary.toLowerCase().includes(normalized) ||
+          node.kind.includes(normalized)
+        ) {
+          revealed.add(node.id);
+        }
+      }
+    }
+    return revealed;
+  }, [projection, query, selectedId]);
   const graphView = useMemo(
     () =>
       createGraphView(projection, {
@@ -176,7 +247,26 @@ export function App() {
     () => new Map(graphView.nodes.map((entry) => [entry.node.id, entry])),
     [graphView],
   );
-  const selectedNode = projection.nodes.get(selectedId);
+  const selectedNode =
+    selectedId === undefined ? undefined : projection.nodes.get(selectedId);
+  const relatedNodes = useMemo(() => {
+    if (selectedId === undefined) return [];
+    const related: RelatedNode[] = [];
+    for (const edge of projection.edges.values()) {
+      if (edge.source === selectedId) {
+        const node = projection.nodes.get(edge.target);
+        if (node !== undefined)
+          related.push({ direction: "outgoing", edge, node });
+      } else if (edge.target === selectedId) {
+        const node = projection.nodes.get(edge.source);
+        if (node !== undefined)
+          related.push({ direction: "incoming", edge, node });
+      }
+    }
+    return related.sort((left, right) =>
+      left.edge.id.localeCompare(right.edge.id),
+    );
+  }, [projection, selectedId]);
   const activeAgents = [...projection.agents.values()];
 
   useEffect(() => {
@@ -255,9 +345,6 @@ export function App() {
           <button className="ghost-button" onClick={replay} type="button">
             <span>↻</span> Replay
           </button>
-          <button className="primary-button" type="button">
-            New inquiry <span>+</span>
-          </button>
         </div>
       </header>
 
@@ -270,7 +357,13 @@ export function App() {
               "The agents are gathering evidence. No decision is needed yet."}
           </span>
         </div>
-        <button type="button">Review decision</button>
+        <button
+          type="button"
+          disabled={projection.attention.length === 0}
+          onClick={() => setSelectedId(projection.attention.at(-1)?.nodeId)}
+        >
+          Review decision
+        </button>
       </section>
 
       <div className="workspace-grid">
@@ -385,13 +478,20 @@ export function App() {
               className="icon-button"
               type="button"
               aria-label="Close inspector"
+              onClick={() => setSelectedId(undefined)}
             >
               ×
             </button>
           </div>
           <Inspector
+            key={selectedId ?? "empty"}
             node={selectedNode}
-            viewNode={graphViewById.get(selectedId)}
+            viewNode={
+              selectedId === undefined
+                ? undefined
+                : graphViewById.get(selectedId)
+            }
+            relatedNodes={relatedNodes}
             onToggle={toggleBranch}
           />
         </aside>
