@@ -1,0 +1,24 @@
+services:
+  runtime:
+    build:
+      context: .
+      target: runtime
+    environment:
+      ZMIND_UI_ORIGINS: ${ZMIND_UI_ORIGINS:-http://127.0.0.1:4310,http://localhost:4310}
+    restart: unless-stopped
+    volumes:
+      - zmind-data:/data
+
+  web:
+    build:
+      context: .
+      target: web
+    depends_on:
+      runtime:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${ZMIND_PORT:-4310}:80"
+    restart: unless-stopped
+
+volumes:
+  zmind-data:

@@ -80,6 +80,24 @@ describe("local runtime API", () => {
     expect(response.statusCode).toBe(403);
   });
 
+  it("allows every explicitly configured local UI origin", async () => {
+    await app.close();
+    app = createRuntime({
+      store,
+      allowedOrigins: ["http://127.0.0.1:4310", "http://localhost:4310"],
+    });
+
+    for (const origin of ["http://127.0.0.1:4310", "http://localhost:4310"]) {
+      const response = await app.inject({
+        method: "GET",
+        url: "/health",
+        headers: { origin },
+      });
+      expect(response.statusCode).toBe(200);
+      expect(response.headers["access-control-allow-origin"]).toBe(origin);
+    }
+  });
+
   it("projects and catches up beyond the internal replay page", async () => {
     const events = generateScaleResearchEvents({ nodeCount: 5_100 });
     for (let offset = 0; offset < events.length; offset += 500) {

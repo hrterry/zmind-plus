@@ -16,6 +16,7 @@ interface CreateRuntimeOptions {
   store: SqliteEventStore;
   hub?: EventHub;
   allowedOrigin?: string;
+  allowedOrigins?: readonly string[];
 }
 
 function serializeProjection(projection: ResearchProjection) {
@@ -39,6 +40,10 @@ function writeSse(stream: NodeJS.WritableStream, event: ResearchEvent): void {
 
 export function createRuntime(options: CreateRuntimeOptions): FastifyInstance {
   const hub = options.hub ?? new EventHub();
+  const allowedOrigins = new Set(
+    options.allowedOrigins ??
+      (options.allowedOrigin === undefined ? [] : [options.allowedOrigin]),
+  );
   const app = Fastify({
     bodyLimit: 1_048_576,
     logger: false,
@@ -46,10 +51,10 @@ export function createRuntime(options: CreateRuntimeOptions): FastifyInstance {
 
   app.addHook("onRequest", async (request, reply) => {
     const origin = request.headers.origin;
-    if (origin !== undefined && origin !== options.allowedOrigin) {
+    if (origin !== undefined && !allowedOrigins.has(origin)) {
       return reply.code(403).send({ error: "This origin is not allowed" });
     }
-    if (origin !== undefined && origin === options.allowedOrigin) {
+    if (origin !== undefined && allowedOrigins.has(origin)) {
       reply.header("Access-Control-Allow-Origin", origin);
       reply.header("Vary", "Origin");
     }

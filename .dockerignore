@@ -1,0 +1,13 @@
+.git
+.github
+.zmind-plus
+**/dist
+**/node_modules
+**/playwright-report
+**/test-results
+coverage
+docs
+*.db
+*.db-shm
+*.db-wal
+*.log

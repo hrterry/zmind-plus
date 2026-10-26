@@ -78,6 +78,18 @@ npm run seed:demo
 The included scenario is fully synthetic and demonstrates delegation, critique,
 experimentation, evidence, conclusion reversal, and a human decision request.
 
+### Self-host with Docker
+
+```bash
+docker compose up --build -d
+```
+
+Open [http://127.0.0.1:4310](http://127.0.0.1:4310). The web container is the
+only host-facing service; it proxies ingestion and live SSE to the private
+runtime container. SQLite persists in the `zmind-data` volume. Override the host
+port with `ZMIND_PORT`, or supply a comma-separated `ZMIND_UI_ORIGINS` when
+placing Zmind+ behind another local origin.
+
 Quality checks:
 
 ```bash
