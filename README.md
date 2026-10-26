@@ -45,9 +45,10 @@ The default view answers three questions:
 
 ## Project status
 
-Zmind+ is in foundation development. The current milestone is a runnable local
-workbench backed by a typed event protocol and a synthetic multi-agent research
-scenario.
+Zmind+ now includes a runnable local workbench, immutable typed event protocol,
+SQLite persistence, replayable live updates, a provider-neutral import SDK, and
+an optional privacy-safe Claude Code lifecycle adapter. The included research
+scenario is fully synthetic.
 
 See [Product and architecture](docs/PRODUCT_AND_ARCHITECTURE.md) and
 [Research notes](docs/RESEARCH_NOTES.md). The progressive-disclosure strategy
@@ -87,6 +88,25 @@ npm run import:jsonl -- --file ./run.jsonl
 The SDK validates the whole input before sending bounded, idempotent batches to
 the local runtime. See [Adapter SDK plan](docs/ADAPTER_SDK_PLAN.md) for the event
 boundary and integration contract.
+
+### Watch Claude Code activity
+
+Build and link the optional local hook command, then print a settings fragment:
+
+```bash
+npm run build --workspace=@zmind-plus/adapter-claude-code
+npm link ./packages/adapter-claude-code
+npm run claude:settings
+```
+
+Merge the generated hooks into the Claude Code settings scope you want, then
+use `/hooks` in Claude Code to verify them. The adapter visualizes sessions,
+subagents, tasks, tool activity, failures, and completion. It discards prompts,
+responses, transcript paths, working directories, task descriptions, tool
+inputs, and tool outputs before contacting the loopback runtime.
+
+See the [adapter instructions](packages/adapter-claude-code/README.md) and
+[privacy and event-mapping plan](docs/CLAUDE_CODE_ADAPTER_PLAN.md).
 
 ### Self-host with Docker
 

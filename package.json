@@ -12,6 +12,7 @@
     "benchmark:graph": "npm run benchmark:graph --workspace=@zmind-plus/core",
     "build": "npm run build --workspaces --if-present",
     "capture:demo": "npm run capture:demo --workspace=@zmind-plus/web && node scripts/transcode-demo.mjs",
+    "claude:settings": "npm run build --workspace=@zmind-plus/adapter-claude-code && node packages/adapter-claude-code/dist/cli.js --print-settings",
     "check:public": "node scripts/check-public-boundary.mjs",
     "dev": "concurrently --kill-others --names runtime,web --prefix-colors blue,magenta \"npm run dev --workspace=@zmind-plus/runtime\" \"npm run dev --workspace=@zmind-plus/web\"",
     "dev:runtime": "npm run dev --workspace=@zmind-plus/runtime",

@@ -12,6 +12,7 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@zmind-plus/adapter-claude-code": "*",
     "@zmind-plus/core": "*",
     "@zmind-plus/store": "*",
     "fastify": "5.12.7",

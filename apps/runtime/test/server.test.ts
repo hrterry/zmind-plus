@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
+import { sanitizeClaudeHook } from "@zmind-plus/adapter-claude-code";
 import {
   generateScaleResearchEvents,
   syntheticResearchEvents,
@@ -117,5 +118,81 @@ describe("local runtime API", () => {
     });
     expect(replay.statusCode).toBe(200);
     expect(replay.body).toContain(`id: ${events.length - 1}`);
+  });
+
+  it("ingests sanitized Claude Code hooks without persisting private content", async () => {
+    const privateText = "PRIVATE_RUNTIME_VALUE";
+    const hook = sanitizeClaudeHook(
+      {
+        session_id: "session-runtime",
+        prompt_id: "prompt-runtime",
+        hook_event_name: "SubagentStart",
+        agent_id: "agent-runtime",
+        agent_type: "reviewer",
+        transcript_path: `/private/${privateText}.jsonl`,
+        last_assistant_message: privateText,
+      },
+      "2026-10-26T20:00:00.000Z",
+    );
+
+    const first = await app.inject({
+      method: "POST",
+      url: "/api/adapters/claude-code/hooks",
+      payload: hook,
+    });
+    expect(first.statusCode).toBe(202);
+    expect(first.json()).toEqual(
+      expect.objectContaining({ accepted: 5, duplicates: 0 }),
+    );
+
+    const retry = await app.inject({
+      method: "POST",
+      url: "/api/adapters/claude-code/hooks",
+      payload: hook,
+    });
+    expect(retry.statusCode).toBe(200);
+    expect(retry.json()).toEqual(
+      expect.objectContaining({ accepted: 0, duplicates: 1 }),
+    );
+
+    const runId = first.json().runId as string;
+    const persisted = store.listAllEvents(runId);
+    expect(persisted).toHaveLength(5);
+    expect(JSON.stringify(persisted)).not.toContain(privateText);
+    expect(store.projectRun(runId)?.nodes.size).toBe(2);
+  });
+
+  it("serializes concurrent Claude Code lifecycle deliveries", async () => {
+    const records = ["tool-a", "tool-b"].map((toolId, index) =>
+      sanitizeClaudeHook(
+        {
+          session_id: "session-concurrent",
+          prompt_id: "prompt-concurrent",
+          hook_event_name: "PostToolUse",
+          tool_use_id: toolId,
+          tool_name: "Read",
+          duration_ms: index + 1,
+        },
+        `2026-10-26T20:00:0${index}.000Z`,
+      ),
+    );
+
+    const responses = await Promise.all(
+      records.map((payload) =>
+        app.inject({
+          method: "POST",
+          url: "/api/adapters/claude-code/hooks",
+          payload,
+        }),
+      ),
+    );
+
+    expect(responses.every((response) => response.statusCode === 202)).toBe(
+      true,
+    );
+    const runId = responses[0]!.json().runId as string;
+    expect(store.listAllEvents(runId).map((event) => event.sequence)).toEqual([
+      0, 1, 2, 3,
+    ]);
   });
 });

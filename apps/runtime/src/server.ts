@@ -1,6 +1,11 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import { ZodError } from "zod";
 
+import {
+  claudeDeliveryEventId,
+  claudeHookRecordSchema,
+  projectClaudeHook,
+} from "@zmind-plus/adapter-claude-code";
 import type { ResearchEvent, ResearchProjection } from "@zmind-plus/core";
 import {
   EventConflictError,
@@ -81,6 +86,32 @@ export function createRuntime(options: CreateRuntimeOptions): FastifyInstance {
 
   app.get("/health", async () => ({ status: "ok" }));
   app.get("/api/runs", async () => ({ runs: options.store.listRuns() }));
+
+  app.post("/api/adapters/claude-code/hooks", async (request, reply) => {
+    const record = claudeHookRecordSchema.parse(request.body);
+    const deliveryEventId = claudeDeliveryEventId(record.deliveryKey);
+    const existing = options.store.getEventById(deliveryEventId);
+    const runId = `claude-${record.sessionKey}`;
+
+    if (existing !== undefined) {
+      return reply.code(200).send({
+        accepted: 0,
+        duplicates: 1,
+        lastSequence: options.store.projectRun(runId)?.lastSequence ?? -1,
+        runId,
+      });
+    }
+
+    const events = projectClaudeHook(record, options.store.projectRun(runId));
+    const result = options.store.appendBatch(events);
+    hub.publish(result.appended);
+    return reply.code(202).send({
+      accepted: result.appended.length,
+      duplicates: result.duplicateCount,
+      lastSequence: result.lastSequence,
+      runId,
+    });
+  });
 
   app.get<{
     Params: { runId: string };

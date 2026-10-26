@@ -239,6 +239,13 @@ export class SqliteEventStore {
     );
   }
 
+  getEventById(eventId: string): ResearchEvent | undefined {
+    const row = asEventRow(this.#findEventById.get(eventId));
+    return row === undefined
+      ? undefined
+      : researchEventSchema.parse(JSON.parse(row.canonical_json));
+  }
+
   listAllEvents(runId: string, after = -1, pageSize = 10_000): ResearchEvent[] {
     const events: ResearchEvent[] = [];
     let cursor = after;

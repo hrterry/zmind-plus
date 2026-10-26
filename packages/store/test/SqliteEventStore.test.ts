@@ -34,6 +34,10 @@ describe("SqliteEventStore", () => {
         lastSequence: syntheticResearchEvents.length - 1,
       }),
     ]);
+    expect(store.getEventById(syntheticResearchEvents[0]!.id)).toEqual(
+      syntheticResearchEvents[0],
+    );
+    expect(store.getEventById("missing-event")).toBeUndefined();
     store.close();
   });
 
