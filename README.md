@@ -78,6 +78,16 @@ npm run seed:demo
 The included scenario is fully synthetic and demonstrates delegation, critique,
 experimentation, evidence, conclusion reversal, and a human decision request.
 
+Import a provider-neutral event stream from JSONL (stdin is also supported):
+
+```bash
+npm run import:jsonl -- --file ./run.jsonl
+```
+
+The SDK validates the whole input before sending bounded, idempotent batches to
+the local runtime. See [Adapter SDK plan](docs/ADAPTER_SDK_PLAN.md) for the event
+boundary and integration contract.
+
 ### Self-host with Docker
 
 ```bash

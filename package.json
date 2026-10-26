@@ -19,6 +19,7 @@
     "seed:demo": "npm run seed:demo --workspace=@zmind-plus/runtime",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "import:jsonl": "npm run import --workspace=@zmind-plus/sdk --",
     "test": "npm run test --workspaces --if-present",
     "test:e2e": "npm run test:e2e --workspace=@zmind-plus/web",
     "typecheck": "npm run typecheck --workspaces --if-present"
