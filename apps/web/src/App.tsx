@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 
 import {
   projectEvents,
@@ -6,8 +6,12 @@ import {
   type ResearchNode,
 } from "@zmind-plus/core";
 
-import { GraphCanvas } from "./GraphCanvas";
 import { useResearchRun } from "./useResearchRun";
+
+const GraphCanvas = lazy(async () => {
+  const module = await import("./GraphCanvas");
+  return { default: module.GraphCanvas };
+});
 
 const statusLabel: Record<string, string> = {
   queued: "Queued",
@@ -252,12 +256,21 @@ export function App() {
           </div>
 
           <div className="graph-stage">
-            <GraphCanvas
-              projection={projection}
-              query={query}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-            />
+            <Suspense
+              fallback={
+                <div className="graph-loading" role="status">
+                  <span />
+                  <strong>Preparing the research graph…</strong>
+                </div>
+              }
+            >
+              <GraphCanvas
+                projection={projection}
+                query={query}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+              />
+            </Suspense>
             <div className="graph-legend">
               <span>
                 <i className="legend-dot dot-active" /> Active

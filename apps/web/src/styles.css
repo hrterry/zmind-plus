@@ -444,6 +444,32 @@ button {
   inset: 0;
 }
 
+.graph-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  color: #7d8792;
+  font-size: 10px;
+}
+
+.graph-loading span {
+  width: 26px;
+  height: 26px;
+  border: 2px solid #dedaf9;
+  border-top-color: #6d5ce7;
+  border-radius: 50%;
+  animation: graph-loading-spin 800ms linear infinite;
+}
+
+@keyframes graph-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .graph-legend,
 .zoom-hint {
   position: absolute;
