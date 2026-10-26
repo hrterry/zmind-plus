@@ -97,6 +97,7 @@ npm run format:check
 npm run typecheck
 npm test
 npm run benchmark:graph
+npm run check:public
 npx playwright install chromium
 npm run test:e2e
 npm run build
