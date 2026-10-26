@@ -99,6 +99,24 @@ button {
   letter-spacing: -0.01em;
 }
 
+.run-identity select {
+  max-width: min(42vw, 420px);
+  border: 0;
+  padding: 2px 22px 2px 2px;
+  color: #17212b;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+}
+
+.run-identity select:focus-visible {
+  border-radius: 5px;
+  outline: 2px solid #6d5ce7;
+  outline-offset: 2px;
+}
+
 .run-identity span:last-child {
   color: #7c8794;
   font-size: 11px;

@@ -37,6 +37,19 @@ const kindLabel: Record<string, string> = {
   artifact: "Artifact",
 };
 
+function runOptionLabel(title: string, updatedAt: string): string {
+  const date = new Date(updatedAt);
+  const timestamp = Number.isNaN(date.valueOf())
+    ? "Local run"
+    : new Intl.DateTimeFormat(undefined, {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(date);
+  return `${title} · ${timestamp}`;
+}
+
 interface RelatedNode {
   direction: "incoming" | "outgoing";
   edge: ResearchEdge;
@@ -194,7 +207,7 @@ function Inspector({
 }
 
 export function App() {
-  const { events, mode } = useResearchRun();
+  const { events, mode, runs, selectedRunId, selectRun } = useResearchRun();
   const [visibleCount, setVisibleCount] = useState(events.length);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedId, setSelectedId] = useState<string | undefined>(
@@ -276,6 +289,7 @@ export function App() {
   useEffect(() => {
     setExpandedNodeIds(new Set());
     setCollapsedNodeIds(new Set());
+    setSelectedId(projection.nodes.keys().next().value);
   }, [projection.runId]);
 
   useEffect(() => {
@@ -292,7 +306,7 @@ export function App() {
   }, [events.length, isPlaying, visibleCount]);
 
   function replay() {
-    setSelectedId("question-root");
+    setSelectedId(projection.nodes.keys().next().value);
     setVisibleCount(Math.min(2, events.length));
     setIsPlaying(true);
   }
@@ -336,7 +350,21 @@ export function App() {
         <div className="run-identity">
           <span className={`live-dot connection-${mode}`} />
           <div>
-            <strong>{projection.title ?? "Preparing research run"}</strong>
+            {runs.length > 1 ? (
+              <select
+                aria-label="Select research run"
+                value={selectedRunId}
+                onChange={(event) => selectRun(event.target.value)}
+              >
+                {runs.map((run) => (
+                  <option key={run.id} value={run.id}>
+                    {runOptionLabel(run.title, run.updatedAt)}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <strong>{projection.title ?? "Preparing research run"}</strong>
+            )}
             <span>{connectionLabel}</span>
           </div>
         </div>

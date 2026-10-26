@@ -6,11 +6,36 @@ import {
 } from "@zmind-plus/core";
 
 import {
+  chooseRunId,
   fetchResearchEventHistory,
   mergeResearchEvents,
 } from "./useResearchRun";
 
+const runs = [
+  {
+    id: "new-run",
+    title: "New run",
+    objective: "New objective",
+    updatedAt: "2026-10-26T20:00:02.000Z",
+    lastSequence: 8,
+  },
+  {
+    id: "old-run",
+    title: "Old run",
+    objective: "Old objective",
+    updatedAt: "2026-10-26T20:00:01.000Z",
+    lastSequence: 4,
+  },
+];
+
 describe("mergeResearchEvents", () => {
+  it("auto-follows the newest run but preserves a manual historical choice", () => {
+    expect(chooseRunId(undefined, runs, false)).toBe("new-run");
+    expect(chooseRunId("old-run", runs, true)).toBe("old-run");
+    expect(chooseRunId("removed-run", runs, true)).toBe("new-run");
+    expect(chooseRunId("old-run", [], true)).toBeUndefined();
+  });
+
   it("deduplicates reconnect replays and preserves sequence order", () => {
     const current = syntheticResearchEvents.slice(0, 4);
     const incoming = [

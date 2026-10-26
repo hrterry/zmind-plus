@@ -1,5 +1,65 @@
 import { expect, test } from "@playwright/test";
 
+import { syntheticResearchEvents } from "@zmind-plus/core";
+
+test("discovers a run created after the workbench is already open", async ({
+  page,
+}) => {
+  let indexRequests = 0;
+  const events = syntheticResearchEvents.map((event) => ({
+    ...event,
+    runId: "run-discovered",
+    ...(event.type === "run.started"
+      ? {
+          payload: {
+            title: "Newly discovered research",
+            objective: "A run that started after the page opened",
+          },
+        }
+      : {}),
+  }));
+
+  await page.route("**/api/runs", async (route) => {
+    indexRequests += 1;
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        runs:
+          indexRequests <= 2
+            ? []
+            : [
+                {
+                  id: "run-discovered",
+                  title: "Newly discovered research",
+                  objective: "A run that started after the page opened",
+                  updatedAt: "2026-10-26T20:00:00.000Z",
+                  lastSequence: events.length - 1,
+                },
+              ],
+      }),
+    });
+  });
+  await page.route("**/api/runs/run-discovered/events**", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({ events }),
+    });
+  });
+  await page.route("**/api/runs/run-discovered/stream**", async (route) => {
+    await route.fulfill({
+      contentType: "text/event-stream",
+      body: ": connected\n\n",
+    });
+  });
+
+  await page.goto("/workbench");
+  await expect(page.getByText("Local synthetic demo")).toBeVisible();
+  await expect(
+    page.getByText("A run that started after the page opened"),
+  ).toBeVisible({ timeout: 5_000 });
+  expect(indexRequests).toBeGreaterThanOrEqual(2);
+});
+
 test("loads the real graph and keeps branch navigation understandable", async ({
   page,
 }) => {

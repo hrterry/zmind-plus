@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   researchEventSchema,
@@ -8,8 +8,10 @@ import {
 
 export type ConnectionMode = "connecting" | "live" | "reconnecting" | "demo";
 
-interface RunSummary {
+export interface RunSummary {
   id: string;
+  title: string;
+  objective: string;
   updatedAt: string;
   lastSequence: number;
 }
@@ -20,6 +22,21 @@ interface RunsResponse {
 
 interface EventsResponse {
   events: unknown[];
+}
+
+export function chooseRunId(
+  current: string | undefined,
+  runs: readonly RunSummary[],
+  manuallySelected: boolean,
+): string | undefined {
+  if (
+    manuallySelected &&
+    current !== undefined &&
+    runs.some((run) => run.id === current)
+  ) {
+    return current;
+  }
+  return runs[0]?.id;
 }
 
 export function mergeResearchEvents(
@@ -73,39 +90,69 @@ export function useResearchRun() {
     syntheticResearchEvents,
   );
   const [mode, setMode] = useState<ConnectionMode>("connecting");
+  const [runs, setRuns] = useState<RunSummary[]>([]);
+  const [selectedRunId, setSelectedRunId] = useState<string>();
+  const manualSelection = useRef(false);
+  const runsRef = useRef<RunSummary[]>([]);
 
   useEffect(() => {
     const controller = new AbortController();
-    let stream: EventSource | undefined;
-
-    async function connect() {
+    async function discoverRuns() {
       try {
         const runsResponse = await fetch("/api/runs", {
           signal: controller.signal,
         });
         if (!runsResponse.ok)
           throw new Error("Runtime run list is unavailable");
-        const runs = (await runsResponse.json()) as RunsResponse;
-        const latest = [...runs.runs].sort((left, right) =>
+        const payload = (await runsResponse.json()) as RunsResponse;
+        const sorted = [...payload.runs].sort((left, right) =>
           right.updatedAt.localeCompare(left.updatedAt),
-        )[0];
+        );
+        runsRef.current = sorted;
+        setRuns(sorted);
+        setSelectedRunId((current) =>
+          chooseRunId(current, sorted, manualSelection.current),
+        );
+        if (sorted.length === 0) setMode("demo");
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.warn("Local run discovery is unavailable.", error);
+        if (runsRef.current.length === 0) setMode("demo");
+      }
+    }
 
-        if (latest === undefined) {
-          setMode("demo");
-          return;
-        }
+    void discoverRuns();
+    const poll = window.setInterval(() => void discoverRuns(), 2_000);
+    return () => {
+      controller.abort();
+      window.clearInterval(poll);
+    };
+  }, []);
 
+  useEffect(() => {
+    if (selectedRunId === undefined) return;
+    const activeRunId = selectedRunId;
+    const controller = new AbortController();
+    let stream: EventSource | undefined;
+    const selected = runsRef.current.find((run) => run.id === activeRunId);
+    if (selected === undefined) return;
+    const lastSequence = selected.lastSequence;
+
+    async function connect() {
+      setMode("connecting");
+      try {
         const replay = await fetchResearchEventHistory(
-          latest.id,
-          latest.lastSequence,
+          activeRunId,
+          lastSequence,
           controller.signal,
         );
+        if (controller.signal.aborted) return;
         setEvents(replay);
         setMode("live");
 
         const cursor = replay.at(-1)?.sequence ?? -1;
         stream = new EventSource(
-          `/api/runs/${latest.id}/stream?after=${cursor}`,
+          `/api/runs/${encodeURIComponent(activeRunId)}/stream?after=${cursor}`,
         );
         stream.addEventListener("open", () => setMode("live"));
         stream.addEventListener("error", () => setMode("reconnecting"));
@@ -114,6 +161,7 @@ export function useResearchRun() {
             const event = researchEventSchema.parse(
               JSON.parse((message as MessageEvent).data),
             );
+            if (event.runId !== activeRunId) return;
             setEvents((current) => mergeResearchEvents(current, [event]));
           } catch {
             console.warn(
@@ -123,9 +171,8 @@ export function useResearchRun() {
         });
       } catch (error) {
         if (controller.signal.aborted) return;
-        console.warn("Using the local synthetic scenario.", error);
-        setEvents(syntheticResearchEvents);
-        setMode("demo");
+        console.warn("The selected local run is unavailable.", error);
+        setMode("reconnecting");
       }
     }
 
@@ -134,7 +181,12 @@ export function useResearchRun() {
       controller.abort();
       stream?.close();
     };
-  }, []);
+  }, [selectedRunId]);
 
-  return { events, mode };
+  function selectRun(runId: string) {
+    manualSelection.current = true;
+    setSelectedRunId(runId);
+  }
+
+  return { events, mode, runs, selectedRunId, selectRun };
 }
