@@ -40,12 +40,37 @@ The default view answers three questions:
 
 ## Project status
 
-Zmind+ is in foundation design. The first milestone is a runnable local
+Zmind+ is in foundation development. The current milestone is a runnable local
 workbench backed by a typed event protocol and a synthetic multi-agent research
 scenario.
 
 See [Product and architecture](docs/PRODUCT_AND_ARCHITECTURE.md) and
 [Research notes](docs/RESEARCH_NOTES.md).
+
+## Run the workbench
+
+Requirements: Node.js 24 or newer.
+
+```bash
+git clone https://github.com/hrterry/zmind-plus.git
+cd zmind-plus
+git switch codex/foundation
+npm install
+npm run dev
+```
+
+Open [http://localhost:4310](http://localhost:4310). The included scenario is
+fully synthetic and demonstrates delegation, critique, experimentation,
+evidence, conclusion reversal, and a human decision request.
+
+Quality checks:
+
+```bash
+npm run format:check
+npm run typecheck
+npm test
+npm run build
+```
 
 ## License
 
