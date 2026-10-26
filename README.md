@@ -9,6 +9,11 @@ reading every token.
 
 > See every hypothesis. Challenge every conclusion.
 
+[![Zmind+ product film](docs/assets/zmind-plus-poster.png)](docs/assets/zmind-plus-demo.mp4)
+
+_Watch the 30-second product film: delegation, adversarial review, experiment,
+evidence reversal, and human judgment._
+
 ## Why Zmind+
 
 Trace viewers are good at showing calls, latency, and failures. Research work has
@@ -88,6 +93,15 @@ npm run build
 The graph benchmark generates provider-neutral corpora at 1k, 5k, and 20k
 nodes. Browser binaries are cached on the development machine and are never
 committed to the repository.
+
+Regenerate the public demo poster, WebM master, and MP4 product film with:
+
+```bash
+npm run capture:demo
+```
+
+The capture drives the same landing-page research scene used by visitors; there
+is no separate mock video implementation.
 
 ## License
 
