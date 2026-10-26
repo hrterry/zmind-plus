@@ -13,6 +13,7 @@
     "dev": "concurrently --kill-others --names runtime,web --prefix-colors blue,magenta \"npm run dev --workspace=@zmind-plus/runtime\" \"npm run dev --workspace=@zmind-plus/web\"",
     "dev:runtime": "npm run dev --workspace=@zmind-plus/runtime",
     "dev:web": "npm run dev --workspace=@zmind-plus/web",
+    "seed:demo": "npm run seed:demo --workspace=@zmind-plus/runtime",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run test --workspaces --if-present",

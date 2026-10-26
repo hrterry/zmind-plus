@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   projectEvents,
-  syntheticResearchEvents,
   type ResearchEvent,
   type ResearchNode,
 } from "@zmind-plus/core";
 
 import { GraphCanvas } from "./GraphCanvas";
+import { useResearchRun } from "./useResearchRun";
 
 const statusLabel: Record<string, string> = {
   queued: "Queued",
@@ -101,16 +101,15 @@ function Inspector({ node }: { node: ResearchNode | undefined }) {
 }
 
 export function App() {
-  const [visibleCount, setVisibleCount] = useState(
-    syntheticResearchEvents.length,
-  );
+  const { events, mode } = useResearchRun();
+  const [visibleCount, setVisibleCount] = useState(events.length);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedId, setSelectedId] = useState("decision-event-log");
   const [query, setQuery] = useState("");
 
   const visibleEvents = useMemo(
-    () => syntheticResearchEvents.slice(0, visibleCount),
-    [visibleCount],
+    () => events.slice(0, visibleCount),
+    [events, visibleCount],
   );
   const projection = useMemo(
     () => projectEvents(visibleEvents),
@@ -120,25 +119,34 @@ export function App() {
   const activeAgents = [...projection.agents.values()];
 
   useEffect(() => {
+    if (!isPlaying) setVisibleCount(events.length);
+  }, [events.length, isPlaying]);
+
+  useEffect(() => {
     if (!isPlaying) return;
-    if (visibleCount >= syntheticResearchEvents.length) {
+    if (visibleCount >= events.length) {
       setIsPlaying(false);
       return;
     }
 
     const timer = window.setTimeout(() => {
-      setVisibleCount((count) =>
-        Math.min(count + 1, syntheticResearchEvents.length),
-      );
+      setVisibleCount((count) => Math.min(count + 1, events.length));
     }, 620);
     return () => window.clearTimeout(timer);
-  }, [isPlaying, visibleCount]);
+  }, [events.length, isPlaying, visibleCount]);
 
   function replay() {
     setSelectedId("question-root");
-    setVisibleCount(2);
+    setVisibleCount(Math.min(2, events.length));
     setIsPlaying(true);
   }
+
+  const connectionLabel = {
+    connecting: "Connecting to local runtime…",
+    live: "Live from local runtime",
+    reconnecting: "Reconnecting · showing committed events",
+    demo: "Local synthetic demo",
+  }[mode];
 
   return (
     <main className="app-shell">
@@ -151,10 +159,10 @@ export function App() {
         </a>
 
         <div className="run-identity">
-          <span className="live-dot" />
+          <span className={`live-dot connection-${mode}`} />
           <div>
             <strong>{projection.title ?? "Preparing research run"}</strong>
-            <span>Local workspace · synthetic scenario</span>
+            <span>{connectionLabel}</span>
           </div>
         </div>
 
@@ -296,7 +304,7 @@ export function App() {
           <div>
             <span className="overline">Event replay</span>
             <strong>
-              {visibleCount} / {syntheticResearchEvents.length}
+              {visibleCount} / {events.length}
             </strong>
           </div>
         </div>
@@ -304,7 +312,7 @@ export function App() {
           className="timeline-range"
           type="range"
           min="1"
-          max={syntheticResearchEvents.length}
+          max={Math.max(events.length, 1)}
           value={visibleCount}
           onChange={(event) => {
             setIsPlaying(false);

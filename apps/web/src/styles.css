@@ -112,6 +112,17 @@ button {
   box-shadow: 0 0 0 5px rgba(38, 174, 118, 0.11);
 }
 
+.connection-connecting,
+.connection-reconnecting {
+  background: #e0a52d;
+  box-shadow: 0 0 0 5px rgba(224, 165, 45, 0.12);
+}
+
+.connection-demo {
+  background: #7869df;
+  box-shadow: 0 0 0 5px rgba(120, 105, 223, 0.11);
+}
+
 .top-actions {
   display: flex;
   gap: 8px;

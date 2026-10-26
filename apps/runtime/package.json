@@ -6,6 +6,7 @@
   "scripts": {
     "build": "esbuild src/main.ts --bundle --platform=node --format=esm --external:fastify --outfile=dist/main.js --sourcemap",
     "dev": "tsx watch src/main.ts",
+    "seed:demo": "tsx src/seed-demo.ts",
     "start": "node dist/main.js",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json"

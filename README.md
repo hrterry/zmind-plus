@@ -59,9 +59,17 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:4310](http://localhost:4310). The included scenario is
-fully synthetic and demonstrates delegation, critique, experimentation,
-evidence, conclusion reversal, and a human decision request.
+Open [http://127.0.0.1:4310](http://127.0.0.1:4310). This starts both the local
+runtime and the workbench. Until a run is ingested, the interface clearly stays
+in Demo mode. To exercise the complete SQLite and SSE path, run this in a second
+terminal:
+
+```bash
+npm run seed:demo
+```
+
+The included scenario is fully synthetic and demonstrates delegation, critique,
+experimentation, evidence, conclusion reversal, and a human decision request.
 
 Quality checks:
 
