@@ -57,6 +57,7 @@ function ResearchFilm() {
       </div>
 
       <div className="film-canvas" aria-hidden="true">
+        <div className="film-scanline" />
         <svg viewBox="0 0 800 490" preserveAspectRatio="none">
           <path className="line line-a" d="M400 78 C310 112 235 125 170 173" />
           <path className="line line-b" d="M400 78 C400 115 400 130 400 173" />
@@ -125,6 +126,18 @@ function ResearchFilm() {
           <span>Human decision</span>
           <strong>Approve the recovery boundary</strong>
         </article>
+        <div className="film-activity">
+          <span>Live activity</span>
+          <p>
+            <i className="activity-violet" /> Three experts delegated
+          </p>
+          <p>
+            <i className="activity-coral" /> Reviewer challenged claim
+          </p>
+          <p>
+            <i className="activity-mint" /> Evidence recorded locally
+          </p>
+        </div>
       </div>
 
       <div className="film-caption" aria-live="polite">
@@ -169,7 +182,7 @@ function ResearchFilm() {
 function Mark() {
   return (
     <span className="landing-mark" aria-hidden="true">
-      Z
+      Z<span>+</span>
     </span>
   );
 }
@@ -226,10 +239,24 @@ export function LandingPage() {
               <i className="proof-provider" /> Works across agent runtimes
             </span>
           </div>
+          <a className="hero-scroll" href="#research-film">
+            <span>Scroll to inspect</span>
+            <i>↓</i>
+          </a>
         </div>
 
         <div className="hero-map" aria-label="A miniature research graph">
           <div className="map-grid" />
+          <div className="map-glow" />
+          <div className="map-window-bar">
+            <span className="window-dots" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
+            <strong>research / resilient-collaboration</strong>
+            <span className="map-sync">Synced locally</span>
+          </div>
           <svg
             viewBox="0 0 600 500"
             preserveAspectRatio="none"
@@ -278,16 +305,37 @@ export function LandingPage() {
             </div>
           </div>
           <div className="map-meta">
-            <span>06:42 elapsed</span>
-            <span className="map-live">Live</span>
+            <span>Run 04 · 06:42 elapsed</span>
+            <span className="map-live">7 agents live</span>
+          </div>
+          <div className="map-telemetry">
+            <span>
+              <b>03</b> workstreams
+            </span>
+            <span>
+              <b>01</b> challenge
+            </span>
+            <span>
+              <b>08</b> evidence
+            </span>
+          </div>
+          <div className="map-activity-card">
+            <span>Just now</span>
+            <p>
+              Reviewer found a shared assumption across architecture and
+              security.
+            </p>
+            <div>
+              <i /> Human review requested
+            </div>
           </div>
         </div>
       </section>
 
       <section className="manifesto-strip" aria-label="Product promise">
-        <span>Delegate broadly.</span>
-        <span>Challenge early.</span>
-        <span>Decide with evidence.</span>
+        <span>01 — Delegate broadly.</span>
+        <span>02 — Challenge early.</span>
+        <span>03 — Decide with evidence.</span>
       </section>
 
       <section className="film-section" id="research-film">
@@ -331,6 +379,15 @@ export function LandingPage() {
           </article>
           <article className="terrain-card">
             <div className="card-label">With Zmind+</div>
+            <div className="terrain-path" aria-hidden="true">
+              <span>Claim</span>
+              <i />
+              <span>Challenge</span>
+              <i />
+              <span>Experiment</span>
+              <i />
+              <span>Decision</span>
+            </div>
             <div className="terrain-result">
               <span className="result-icon">✓</span>
               <div>
@@ -357,32 +414,46 @@ export function LandingPage() {
           </h2>
         </div>
         <div className="capability-grid">
-          <article>
+          <article className="capability-delegate">
             <span>01 / Delegate</span>
+            <div className="capability-symbol" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </div>
             <h3>See every workstream</h3>
             <p>
               Know who is exploring what, what is blocked, and where work
               overlaps.
             </p>
           </article>
-          <article>
+          <article className="capability-challenge">
             <span>02 / Challenge</span>
+            <div className="capability-symbol" aria-hidden="true">
+              <b>?</b>
+            </div>
             <h3>Make dissent visible</h3>
             <p>
               Reviewer objections stay attached to the exact claim they
               challenge.
             </p>
           </article>
-          <article>
+          <article className="capability-verify">
             <span>03 / Verify</span>
+            <div className="capability-symbol" aria-hidden="true">
+              <b>✓</b>
+            </div>
             <h3>Trace claims to evidence</h3>
             <p>
               Experiments, sources, and reversals remain inspectable after the
               answer.
             </p>
           </article>
-          <article>
+          <article className="capability-intervene">
             <span>04 / Intervene</span>
+            <div className="capability-symbol" aria-hidden="true">
+              <b>↗</b>
+            </div>
             <h3>Decide at the right moment</h3>
             <p>
               Agents keep moving until a boundary genuinely needs human
@@ -406,6 +477,10 @@ export function LandingPage() {
           </a>
         </div>
         <div className="architecture-card">
+          <div className="architecture-header">
+            <span>Data boundary</span>
+            <b>Local</b>
+          </div>
           <div className="arch-row">
             <span>Your agents</span>
             <b>Any runtime</b>
@@ -428,6 +503,7 @@ export function LandingPage() {
       </section>
 
       <section className="final-cta">
+        <div className="final-grid" aria-hidden="true" />
         <div>
           <Mark />
           <span>Open source · local first · provider neutral</span>
