@@ -90,9 +90,9 @@
   align-items: center;
   gap: 34px;
   color: #adadb6;
-  font-family: "DM Mono", monospace;
-  font-size: 10px;
-  letter-spacing: 0.04em;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
@@ -174,7 +174,6 @@
   padding-bottom: 16px;
 }
 
-.hero-kicker,
 .section-eyebrow,
 .card-label,
 .film-title,
@@ -189,8 +188,11 @@
   align-items: center;
   gap: 11px;
   margin-bottom: 34px;
-  color: #9a9aa5;
-  font-size: 9px;
+  color: #b0b0b9;
+  font-size: 11px;
+  font-weight: 680;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
 .hero-kicker span {
@@ -284,7 +286,7 @@
   margin-top: 40px;
   color: #85858f;
   font-family: "DM Mono", monospace;
-  font-size: 9px;
+  font-size: 10px;
   text-transform: uppercase;
 }
 
@@ -432,8 +434,8 @@
 .hero-map > svg {
   position: absolute;
   z-index: 2;
-  inset: 96px 28px 128px;
-  width: calc(100% - 56px);
+  inset: 96px 0 128px;
+  width: 100%;
   height: calc(100% - 224px);
 }
 
@@ -512,7 +514,7 @@
 }
 
 .map-agent {
-  top: 292px;
+  top: 287px;
   display: flex;
   align-items: center;
   gap: 11px;
@@ -540,7 +542,8 @@
 }
 
 .agent-one {
-  left: 6%;
+  left: 22%;
+  transform: translateX(-50%);
 }
 
 .agent-two {
@@ -549,7 +552,9 @@
 }
 
 .agent-three {
-  right: 6%;
+  right: auto;
+  left: 78%;
+  transform: translateX(-50%);
 }
 
 .agent-two > span {
@@ -759,7 +764,10 @@
 .section-eyebrow {
   margin: 0 0 14px;
   color: var(--muted);
-  font-size: 9px;
+  font-family: Manrope, Inter, sans-serif;
+  font-size: 11px;
+  font-weight: 720;
+  letter-spacing: 0.08em;
 }
 
 .section-intro h2,
@@ -864,8 +872,8 @@
 
 .film-canvas svg {
   position: absolute;
-  inset: 30px 11%;
-  width: 72%;
+  inset: 30px auto 30px 0;
+  width: 74%;
   height: calc(100% - 60px);
 }
 
@@ -914,8 +922,8 @@
 }
 
 .node-question {
-  top: 42px;
-  left: 44%;
+  top: 60px;
+  left: 37%;
   width: 286px;
   border-color: #7667dc;
   background: #25223a;
@@ -923,10 +931,11 @@
 }
 
 .node-expert {
-  top: 180px;
+  top: 217px;
   display: flex;
   align-items: center;
   gap: 10px;
+  transform: translateX(-50%) translateY(10px) scale(0.97);
 }
 
 .node-expert i {
@@ -943,16 +952,16 @@
 }
 
 .node-architecture {
-  left: 7%;
+  left: 15.725%;
 }
 
 .node-performance {
-  left: 44%;
-  transform: translateX(-50%);
+  left: 37%;
 }
 
 .node-security {
-  right: 19%;
+  right: auto;
+  left: 58.275%;
 }
 
 .node-performance i {
@@ -964,8 +973,8 @@
 }
 
 .node-reviewer {
-  top: 318px;
-  left: 44%;
+  top: 360px;
+  left: 37%;
   width: 260px;
   border-color: var(--coral);
   background: #372321;
@@ -973,8 +982,8 @@
 }
 
 .node-experiment {
-  top: 434px;
-  left: 44%;
+  top: 440px;
+  left: 37%;
   width: 220px;
   border-color: var(--yellow);
   transform: translateX(-50%);
@@ -1085,14 +1094,6 @@
 .research-film[data-act="2"] .node-expert,
 .research-film[data-act="3"] .node-expert,
 .research-film[data-act="4"] .node-expert {
-  transform: translateY(0) scale(1);
-}
-
-.research-film[data-act="0"] .node-performance,
-.research-film[data-act="1"] .node-performance,
-.research-film[data-act="2"] .node-performance,
-.research-film[data-act="3"] .node-performance,
-.research-film[data-act="4"] .node-performance {
   transform: translateX(-50%) translateY(0) scale(1);
 }
 
@@ -1797,7 +1798,7 @@
 
   .hero-kicker {
     margin-bottom: 27px;
-    font-size: 8px;
+    font-size: 10px;
   }
 
   .hero-copy h1 {
@@ -1849,8 +1850,8 @@
   }
 
   .hero-map > svg {
-    inset: 98px 10px 106px;
-    width: calc(100% - 20px);
+    inset: 98px 0 106px;
+    width: 100%;
     height: calc(100% - 204px);
   }
 
@@ -1861,7 +1862,7 @@
   }
 
   .map-agent {
-    top: 238px;
+    top: 227px;
     width: 103px;
     gap: 6px;
     padding: 8px;
@@ -1882,11 +1883,12 @@
   }
 
   .agent-one {
-    left: 3%;
+    left: 22%;
   }
 
   .agent-three {
-    right: 3%;
+    right: auto;
+    left: 78%;
   }
 
   .map-challenge {
@@ -1961,8 +1963,8 @@
   }
 
   .film-canvas svg {
-    inset: 22px 2%;
-    width: 96%;
+    inset: 22px 0;
+    width: 100%;
     height: calc(100% - 44px);
   }
 
@@ -1980,12 +1982,13 @@
   }
 
   .node-question {
+    top: 42px;
     left: 50%;
     width: 220px;
   }
 
   .node-expert {
-    top: 165px;
+    top: 183px;
     width: 105px;
     gap: 6px;
   }
@@ -1996,7 +1999,7 @@
   }
 
   .node-architecture {
-    left: 2%;
+    left: 21.25%;
   }
 
   .node-performance {
@@ -2004,17 +2007,18 @@
   }
 
   .node-security {
-    right: 2%;
+    right: auto;
+    left: 78.75%;
   }
 
   .node-reviewer {
-    top: 277px;
+    top: 307px;
     left: 50%;
     width: 210px;
   }
 
   .node-experiment {
-    top: 374px;
+    top: 376px;
     left: 50%;
     width: 180px;
   }
@@ -2030,9 +2034,7 @@
   }
 
   .node-decision {
-    right: 8px;
-    bottom: 120px;
-    width: 176px;
+    display: none;
   }
 
   .film-activity {

@@ -262,9 +262,15 @@ export function LandingPage() {
             preserveAspectRatio="none"
             aria-hidden="true"
           >
-            <path d="M300 90 C210 128 170 155 132 206" />
-            <path d="M300 90 L300 206" />
-            <path d="M300 90 C390 128 430 155 468 206" />
+            <path
+              className="hero-line hero-line-a"
+              d="M300 90 C210 128 170 155 132 206"
+            />
+            <path className="hero-line hero-line-b" d="M300 90 L300 206" />
+            <path
+              className="hero-line hero-line-c"
+              d="M300 90 C390 128 430 155 468 206"
+            />
             <path className="challenge" d="M132 253 C180 315 245 322 300 356" />
             <path className="challenge" d="M468 253 C420 315 355 322 300 356" />
           </svg>
