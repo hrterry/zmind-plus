@@ -2,7 +2,8 @@
 
 Date: 2026-10-26
 
-Status: Foundation approved; implementation begins with a synthetic live run.
+Status: Release candidate implemented on `codex/foundation`; synthetic and live
+adapter paths are verified locally.
 
 ## 1. Product definition
 

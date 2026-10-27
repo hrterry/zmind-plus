@@ -2,7 +2,7 @@
 
 Date: 2026-10-26
 
-Status: In progress on `codex/foundation`.
+Status: Implemented and verified on `codex/foundation`.
 
 ## Outcome
 
