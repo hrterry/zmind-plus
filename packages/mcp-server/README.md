@@ -17,7 +17,7 @@ claude mcp add zmind-plus -- zmind-mcp
 
 Run `/mcp` in Claude Code to confirm that `zmind-plus` is connected. Set
 `ZMIND_RUNTIME_URL` before launching Claude Code when the runtime is not at
-`http://127.0.0.1:4311`.
+`http://127.0.0.1:4310`.
 
 The recorder exposes `start_research`, `attach_latest_research`,
 `record_finding`, `connect_findings`, `request_human_review`, and

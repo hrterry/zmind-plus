@@ -25,7 +25,8 @@ Do not replace an existing `hooks` object. Merge the generated event keys with
 the hooks already configured. Run `/hooks` inside Claude Code to confirm the
 configuration was loaded.
 
-The hook sends to `http://127.0.0.1:4311` by default. Set
+The hook sends through the public local gateway at `http://127.0.0.1:4310` by
+default, which works with both Vite development and Docker. Set
 `ZMIND_RUNTIME_URL` if the local runtime uses another address. Visualization is
 best-effort and never blocks Claude Code when the runtime is down. Set
 `ZMIND_HOOK_STRICT=1` only when a missing visualization event should fail the

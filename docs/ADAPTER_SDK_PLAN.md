@@ -51,8 +51,8 @@ sequenceDiagram
 ## CLI contract
 
 ```bash
-zmind-import --file run.jsonl --runtime http://127.0.0.1:4311
-cat run.jsonl | zmind-import --runtime http://127.0.0.1:4311
+zmind-import --file run.jsonl --runtime http://127.0.0.1:4310
+cat run.jsonl | zmind-import --runtime http://127.0.0.1:4310
 ```
 
 - stdin is the default input.

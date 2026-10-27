@@ -74,7 +74,7 @@ export class ZmindClient {
   readonly #fetcher: typeof fetch;
 
   constructor(options: ZmindClientOptions = {}) {
-    this.#baseUrl = (options.baseUrl ?? "http://127.0.0.1:4311").replace(
+    this.#baseUrl = (options.baseUrl ?? "http://127.0.0.1:4310").replace(
       /\/+$/,
       "",
     );

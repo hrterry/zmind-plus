@@ -23,7 +23,7 @@ async function main(): Promise<void> {
   const raw = JSON.parse(await readStdin()) as unknown;
   const record = sanitizeClaudeHook(raw);
   const runtimeUrl = (
-    process.env.ZMIND_RUNTIME_URL ?? "http://127.0.0.1:4311"
+    process.env.ZMIND_RUNTIME_URL ?? "http://127.0.0.1:4310"
   ).replace(/\/+$/, "");
   const response = await fetch(`${runtimeUrl}/api/adapters/claude-code/hooks`, {
     method: "POST",

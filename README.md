@@ -89,6 +89,10 @@ The SDK validates the whole input before sending bounded, idempotent batches to
 the local runtime. See [Adapter SDK plan](docs/ADAPTER_SDK_PLAN.md) for the event
 boundary and integration contract.
 
+All host-side clients use the public local gateway at `127.0.0.1:4310` by
+default, so the same commands work in development and Docker. Override the URL
+only when running the Runtime API by itself or changing the Docker host port.
+
 ### Watch Claude Code activity
 
 Build and link the optional local hook command, then print a settings fragment:

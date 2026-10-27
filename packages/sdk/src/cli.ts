@@ -9,7 +9,7 @@ interface CliOptions {
 
 function parseArguments(arguments_: readonly string[]): CliOptions {
   let file = "-";
-  let runtime = "http://127.0.0.1:4311";
+  let runtime = "http://127.0.0.1:4310";
 
   for (let index = 0; index < arguments_.length; index += 1) {
     const argument = arguments_[index];
@@ -21,7 +21,7 @@ function parseArguments(arguments_: readonly string[]): CliOptions {
       index += 1;
     } else if (argument === "--help" || argument === "-h") {
       console.log(
-        "Usage: zmind-import [--file run.jsonl|-] [--runtime http://127.0.0.1:4311]",
+        "Usage: zmind-import [--file run.jsonl|-] [--runtime http://127.0.0.1:4310]",
       );
       process.exit(0);
     } else {

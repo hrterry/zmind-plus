@@ -1,6 +1,6 @@
 import { syntheticResearchEvents } from "@zmind-plus/core";
 
-const endpoint = process.env.ZMIND_RUNTIME_URL ?? "http://127.0.0.1:4311";
+const endpoint = process.env.ZMIND_RUNTIME_URL ?? "http://127.0.0.1:4310";
 const runId = syntheticResearchEvents[0]!.runId;
 const response = await fetch(`${endpoint}/api/runs/${runId}/events`, {
   method: "POST",
