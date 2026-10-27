@@ -47,8 +47,9 @@ The default view answers three questions:
 
 Zmind+ now includes a runnable local workbench, immutable typed event protocol,
 SQLite persistence, replayable live updates, a provider-neutral import SDK, and
-an optional privacy-safe Claude Code lifecycle adapter. The included research
-scenario is fully synthetic.
+an optional privacy-safe Claude Code lifecycle adapter. The workbench switches
+between a spatial graph and a source-addressed structured brief for fast linear
+review. The included research scenario is fully synthetic.
 
 See [Product and architecture](docs/PRODUCT_AND_ARCHITECTURE.md) and
 [Research notes](docs/RESEARCH_NOTES.md). The progressive-disclosure strategy

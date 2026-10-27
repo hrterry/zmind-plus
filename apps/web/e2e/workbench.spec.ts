@@ -74,6 +74,33 @@ test("loads the real graph and keeps branch navigation understandable", async ({
     0,
   );
 
+  await page.getByRole("button", { name: "Brief" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Research brief" }),
+  ).toBeVisible();
+  for (const section of [
+    "Current decision",
+    "Evidence",
+    "Reversals",
+    "Open challenges",
+    "Experiments",
+  ]) {
+    await expect(page.getByRole("heading", { name: section })).toBeVisible();
+  }
+  await page
+    .getByRole("button", {
+      name: /Use an append-only event log with a live delivery channel/,
+    })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Graph", pressed: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "Use an append-only event log with a live delivery channel",
+    }),
+  ).toBeVisible();
+
   await page.getByRole("button", { name: "Review decision" }).click();
   await expect(
     page.getByRole("heading", {

@@ -75,3 +75,16 @@ flowchart LR
 4. Search produces the same semantic matches in both views.
 5. Empty and large runs remain understandable and keyboard accessible.
 6. Unit, browser, formatting, lint, type, build, privacy, and scale checks pass.
+
+## Implementation review
+
+- Graph and Brief are peer views selected by one compact control.
+- Five deterministic sections are projected from the current local graph; no
+  new persistence layer or model-generated prose was introduced.
+- Confidence, status, kind, summary, and source node identity remain visible.
+- Clicking any brief row returns to the graph and opens the existing provenance
+  inspector on that exact node.
+- Search shares one matcher across graph disclosure and brief filtering,
+  including title, summary, kind, status, and tags.
+- Desktop and mobile renders were visually reviewed; mobile rows wrap full
+  conclusions instead of truncating the document's primary content.

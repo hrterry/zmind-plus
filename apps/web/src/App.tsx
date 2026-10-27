@@ -24,6 +24,8 @@ import {
   importResearchJsonl,
   portableFilename,
 } from "./dataPortability";
+import { matchesResearchNode } from "./researchBrief";
+import { ResearchBrief } from "./ResearchBrief";
 
 const GraphCanvas = lazy(async () => {
   const module = await import("./GraphCanvas");
@@ -233,6 +235,7 @@ export function App() {
     "decision-event-log",
   );
   const [query, setQuery] = useState("");
+  const [centerView, setCenterView] = useState<"graph" | "brief">("graph");
   const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(
     () => new Set(),
   );
@@ -259,13 +262,7 @@ export function App() {
     if (selectedId !== undefined) revealed.add(selectedId);
     if (normalized.length > 0) {
       for (const node of projection.nodes.values()) {
-        if (
-          node.title.toLowerCase().includes(normalized) ||
-          node.summary.toLowerCase().includes(normalized) ||
-          node.kind.includes(normalized)
-        ) {
-          revealed.add(node.id);
-        }
+        if (matchesResearchNode(node, normalized)) revealed.add(node.id);
       }
     }
     return revealed;
@@ -566,60 +563,106 @@ export function App() {
         <section className="graph-panel panel">
           <div className="graph-toolbar">
             <div>
-              <span className="overline">Living research graph</span>
+              <span className="overline">
+                {centerView === "graph"
+                  ? "Living research graph"
+                  : "Research synthesis"}
+              </span>
               <strong>
                 {projection.objective ?? "Waiting for the objective"}
               </strong>
               <span className="graph-count">
-                {graphView.nodes.length} visible
-                {graphView.hiddenNodeCount > 0
-                  ? ` · ${graphView.hiddenNodeCount} folded`
-                  : " · complete view"}
+                {centerView === "graph" ? (
+                  <>
+                    {graphView.nodes.length} visible
+                    {graphView.hiddenNodeCount > 0
+                      ? ` · ${graphView.hiddenNodeCount} folded`
+                      : " · complete view"}
+                  </>
+                ) : (
+                  "Evidence-linked · source-addressed"
+                )}
               </span>
             </div>
-            <label className="search-box">
-              <span>⌕</span>
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Find evidence, critique, decision…"
-                aria-label="Search research graph"
-              />
-              <kbd>⌘ K</kbd>
-            </label>
+            <div className="graph-toolbar-actions">
+              <div
+                className="view-switch"
+                role="group"
+                aria-label="Center view"
+              >
+                <button
+                  type="button"
+                  aria-pressed={centerView === "graph"}
+                  onClick={() => setCenterView("graph")}
+                >
+                  Graph
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={centerView === "brief"}
+                  onClick={() => setCenterView("brief")}
+                >
+                  Brief
+                </button>
+              </div>
+              <label className="search-box">
+                <span>⌕</span>
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Find evidence, critique, decision…"
+                  aria-label="Search research"
+                />
+                <kbd>⌘ K</kbd>
+              </label>
+            </div>
           </div>
 
-          <div className="graph-stage">
-            <Suspense
-              fallback={
-                <div className="graph-loading" role="status">
-                  <span />
-                  <strong>Preparing the research graph…</strong>
-                </div>
-              }
-            >
-              <GraphCanvas
-                view={graphView}
-                query={query}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                onToggle={toggleBranch}
-              />
-            </Suspense>
-            <div className="graph-legend">
-              <span>
-                <i className="legend-dot dot-active" /> Active
-              </span>
-              <span>
-                <i className="legend-dot dot-evidence" /> Evidence
-              </span>
-              <span>
-                <i className="legend-line" /> Challenge / refute
-              </span>
-              <span className="legend-fold">Double border = folded branch</span>
+          {centerView === "graph" ? (
+            <div className="graph-stage">
+              <Suspense
+                fallback={
+                  <div className="graph-loading" role="status">
+                    <span />
+                    <strong>Preparing the research graph…</strong>
+                  </div>
+                }
+              >
+                <GraphCanvas
+                  view={graphView}
+                  query={query}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
+                  onToggle={toggleBranch}
+                />
+              </Suspense>
+              <div className="graph-legend">
+                <span>
+                  <i className="legend-dot dot-active" /> Active
+                </span>
+                <span>
+                  <i className="legend-dot dot-evidence" /> Evidence
+                </span>
+                <span>
+                  <i className="legend-line" /> Challenge / refute
+                </span>
+                <span className="legend-fold">
+                  Double border = folded branch
+                </span>
+              </div>
+              <div className="zoom-hint">Scroll to zoom · drag to explore</div>
             </div>
-            <div className="zoom-hint">Scroll to zoom · drag to explore</div>
-          </div>
+          ) : (
+            <ResearchBrief
+              nodes={projection.nodes.values()}
+              objective={projection.objective}
+              query={query}
+              onSelect={(nodeId) => {
+                setSelectedId(nodeId);
+                setCenterView("graph");
+              }}
+            />
+          )}
         </section>
 
         <aside className="inspector-panel panel">
