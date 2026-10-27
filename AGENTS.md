@@ -25,4 +25,3 @@ material. Examples and tests must use synthetic, provider-neutral scenarios.
   visible without navigation.
 - Every destructive or externally visible action requires an explicit user
   gesture.
-

@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM"],
+    "types": ["node"]
+  },
+  "include": [
+    "demo/**/*.ts",
+    "e2e/**/*.ts",
+    "vercel-e2e/**/*.ts",
+    "playwright.config.ts",
+    "playwright.demo.config.ts",
+    "playwright.vercel.config.ts"
+  ]
+}

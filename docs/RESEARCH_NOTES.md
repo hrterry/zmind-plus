@@ -79,4 +79,3 @@ Zmind+ target                 high               high             high
 The defensible unit is the **living research graph**: a deterministic,
 source-addressable projection that joins runtime activity with structured
 claims, evidence, critiques, and revisions.
-

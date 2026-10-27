@@ -1,9 +1,12 @@
 node_modules/
 dist/
 coverage/
+playwright-report/
+test-results/
 .env
 .env.*
 !.env.example
+.zmind-plus/
 *.db
 *.db-shm
 *.db-wal
@@ -11,4 +14,3 @@ coverage/
 .DS_Store
 .idea/
 .vscode/
-
