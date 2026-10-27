@@ -2,7 +2,7 @@
 
 ## Outcome
 
-Every TypeScript workspace is checked by one root ESLint gate in addition to
+Every TypeScript workspace is checked by one root Oxlint gate in addition to
 formatting, strict compilation, tests, and production builds.
 
 ```text
@@ -13,9 +13,11 @@ source files
    └── tests/build    behavior + packaging
 ```
 
-The configuration uses ESLint flat config, type-aware `typescript-eslint`
-rules, and React Hooks rules for the web workspace. Generated bundles, browser
-artifacts, dependencies, and public media are excluded.
+The configuration uses Oxlint with its TypeScript 7 type-aware companion and
+React rules. Stable `typescript-eslint` currently declares support only through
+TypeScript 6.0, so forcing that unsupported peer combination is deliberately
+avoided. Generated bundles, browser artifacts, dependencies, and public media
+are excluded.
 
 ```mermaid
 flowchart LR

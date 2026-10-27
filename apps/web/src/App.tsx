@@ -266,6 +266,7 @@ export function App() {
   );
   const selectedNode =
     selectedId === undefined ? undefined : projection.nodes.get(selectedId);
+  const firstNodeId = projection.nodes.keys().next().value;
   const relatedNodes = useMemo(() => {
     if (selectedId === undefined) return [];
     const related: RelatedNode[] = [];
@@ -293,8 +294,8 @@ export function App() {
   useEffect(() => {
     setExpandedNodeIds(new Set());
     setCollapsedNodeIds(new Set());
-    setSelectedId(projection.nodes.keys().next().value);
-  }, [projection.runId]);
+    setSelectedId(firstNodeId);
+  }, [firstNodeId, projection.runId]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -344,7 +345,7 @@ export function App() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <a className="brand" href="#" aria-label="Zmind+ home">
+        <a className="brand" href="/" aria-label="Zmind+ home">
           <span className="brand-glyph">Z</span>
           <span>
             Zmind<sup>+</sup>

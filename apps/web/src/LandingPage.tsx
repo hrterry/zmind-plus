@@ -31,24 +31,20 @@ const acts = [
 ] as const;
 
 function ResearchFilm() {
-  const [act, setAct] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+  const [act, setAct] = useState(prefersReducedMotion ? acts.length - 1 : 0);
+  const [isPlaying, setIsPlaying] = useState(!prefersReducedMotion);
   const currentAct = acts[act] ?? acts[0];
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setAct(acts.length - 1);
-      setIsPlaying(false);
-    }
-  }, []);
-
-  useEffect(() => {
     if (!isPlaying) return;
-    const timer = window.setTimeout(() => {
+    const timer = window.setInterval(() => {
       setAct((current) => (current + 1) % acts.length);
     }, 2_600);
-    return () => window.clearTimeout(timer);
-  }, [act, isPlaying]);
+    return () => window.clearInterval(timer);
+  }, [isPlaying]);
 
   return (
     <div className="research-film" data-act={act}>

@@ -66,8 +66,10 @@ export function GraphCanvas({
   const onSelectRef = useRef(onSelect);
   const onToggleRef = useRef(onToggle);
 
-  onSelectRef.current = onSelect;
-  onToggleRef.current = onToggle;
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+    onToggleRef.current = onToggle;
+  }, [onSelect, onToggle]);
 
   function activateNode(
     nodeId: string,
