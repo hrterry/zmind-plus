@@ -5,7 +5,13 @@ import {
   syntheticResearchEvents,
 } from "@zmind-plus/core";
 
-import { parseResearchJsonl, ZmindClient, ZmindSdkError } from "../src";
+import {
+  createResearchEventBatches,
+  parseResearchJsonl,
+  serializeResearchJsonl,
+  ZmindClient,
+  ZmindSdkError,
+} from "../src";
 
 describe("Zmind adapter SDK", () => {
   it("parses blank-line tolerant JSONL", () => {
@@ -23,6 +29,31 @@ describe("Zmind adapter SDK", () => {
     expect(() => parseResearchJsonl("\nprivate raw value{")).toThrow(
       new ZmindSdkError("Line 2 is not valid JSON"),
     );
+  });
+
+  it("round-trips portable JSONL without changing event meaning", () => {
+    const events = syntheticResearchEvents.slice(0, 4);
+    expect(parseResearchJsonl(serializeResearchJsonl(events))).toEqual(events);
+  });
+
+  it("honors both byte and event limits when creating request batches", () => {
+    const events = syntheticResearchEvents.slice(0, 4);
+    const twoEventBytes = new TextEncoder().encode(
+      JSON.stringify(events.slice(0, 2)),
+    ).byteLength;
+    const batches = createResearchEventBatches(events, {
+      maxBodyBytes: twoEventBytes,
+      maxEvents: 3,
+    });
+
+    expect(batches.map((batch) => batch.length)).toEqual([2, 2]);
+    expect(
+      batches.every(
+        (batch) =>
+          new TextEncoder().encode(JSON.stringify(batch)).byteLength <=
+          twoEventBytes,
+      ),
+    ).toBe(true);
   });
 
   it("validates and uploads large runs in bounded sequential batches", async () => {

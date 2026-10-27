@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   researchEventSchema,
@@ -92,28 +92,46 @@ export function useResearchRun() {
   const [mode, setMode] = useState<ConnectionMode>("connecting");
   const [runs, setRuns] = useState<RunSummary[]>([]);
   const [selectedRunId, setSelectedRunId] = useState<string>();
+  const [connectionRevision, setConnectionRevision] = useState(0);
   const manualSelection = useRef(false);
   const runsRef = useRef<RunSummary[]>([]);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    async function discoverRuns() {
-      try {
-        const runsResponse = await fetch("/api/runs", {
-          signal: controller.signal,
-        });
-        if (!runsResponse.ok)
-          throw new Error("Runtime run list is unavailable");
-        const payload = (await runsResponse.json()) as RunsResponse;
-        const sorted = [...payload.runs].sort((left, right) =>
-          right.updatedAt.localeCompare(left.updatedAt),
-        );
-        runsRef.current = sorted;
-        setRuns(sorted);
+  const discoverRuns = useCallback(
+    async (signal?: AbortSignal, preferredRunId?: string) => {
+      const runsResponse = await fetch(
+        "/api/runs",
+        signal === undefined ? undefined : { signal },
+      );
+      if (!runsResponse.ok) throw new Error("Runtime run list is unavailable");
+      const payload = (await runsResponse.json()) as RunsResponse;
+      const sorted = [...payload.runs].sort((left, right) =>
+        right.updatedAt.localeCompare(left.updatedAt),
+      );
+      runsRef.current = sorted;
+      setRuns(sorted);
+      if (preferredRunId !== undefined) {
+        if (!sorted.some((run) => run.id === preferredRunId)) {
+          throw new Error("The imported run is not available yet");
+        }
+        manualSelection.current = true;
+        setSelectedRunId(preferredRunId);
+        setConnectionRevision((revision) => revision + 1);
+      } else {
         setSelectedRunId((current) =>
           chooseRunId(current, sorted, manualSelection.current),
         );
-        if (sorted.length === 0) setMode("demo");
+      }
+      if (sorted.length === 0) setMode("demo");
+      return sorted;
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function pollRuns() {
+      try {
+        await discoverRuns(controller.signal);
       } catch (error) {
         if (controller.signal.aborted) return;
         console.warn("Local run discovery is unavailable.", error);
@@ -121,13 +139,13 @@ export function useResearchRun() {
       }
     }
 
-    void discoverRuns();
-    const poll = window.setInterval(() => void discoverRuns(), 2_000);
+    void pollRuns();
+    const poll = window.setInterval(() => void pollRuns(), 2_000);
     return () => {
       controller.abort();
       window.clearInterval(poll);
     };
-  }, []);
+  }, [discoverRuns]);
 
   useEffect(() => {
     if (selectedRunId === undefined) return;
@@ -181,12 +199,16 @@ export function useResearchRun() {
       controller.abort();
       stream?.close();
     };
-  }, [selectedRunId]);
+  }, [connectionRevision, selectedRunId]);
 
   function selectRun(runId: string) {
     manualSelection.current = true;
     setSelectedRunId(runId);
   }
 
-  return { events, mode, runs, selectedRunId, selectRun };
+  async function openRun(runId: string): Promise<void> {
+    await discoverRuns(undefined, runId);
+  }
+
+  return { events, mode, runs, selectedRunId, selectRun, openRun };
 }

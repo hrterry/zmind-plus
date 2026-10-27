@@ -146,6 +146,18 @@ button {
   gap: 8px;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .ghost-button,
 .primary-button,
 .attention-bar button,
@@ -157,6 +169,12 @@ button {
   font-weight: 680;
 }
 
+.ghost-button:disabled,
+.primary-button:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+
 .ghost-button {
   color: #4e5965;
   background: rgba(255, 255, 255, 0.78);
@@ -165,10 +183,74 @@ button {
 
 .primary-button {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  gap: 7px;
   color: white;
   background: #17212b;
   box-shadow: 0 6px 18px rgba(23, 33, 43, 0.13);
+}
+
+.transfer-notice {
+  position: fixed;
+  z-index: 20;
+  top: 78px;
+  right: 18px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: min(390px, calc(100vw - 24px));
+  padding: 12px 13px;
+  border: 1px solid #dcd7ff;
+  border-radius: 12px;
+  color: #40368b;
+  background: rgba(248, 247, 255, 0.97);
+  box-shadow: 0 14px 38px rgba(31, 36, 52, 0.16);
+  backdrop-filter: blur(12px);
+}
+
+.transfer-notice > span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  color: white;
+  background: #6d5ce7;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.transfer-notice strong {
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.transfer-notice button {
+  border: 0;
+  color: currentColor;
+  background: transparent;
+  font-size: 18px;
+}
+
+.notice-success {
+  border-color: #cde8db;
+  color: #256b4f;
+  background: rgba(244, 252, 248, 0.97);
+}
+
+.notice-success > span {
+  background: #2ca573;
+}
+
+.notice-error {
+  border-color: #f0d1cd;
+  color: #8f4139;
+  background: rgba(255, 248, 247, 0.97);
+}
+
+.notice-error > span {
+  background: #dc6559;
 }
 
 .attention-bar {
@@ -1000,6 +1082,16 @@ button {
   }
   .ghost-button {
     display: none;
+  }
+  .ghost-button.data-button {
+    display: flex;
+  }
+  .data-button {
+    padding: 8px 9px;
+  }
+  .transfer-notice {
+    top: 70px;
+    right: 8px;
   }
   .attention-bar > div > span:last-child {
     display: none;

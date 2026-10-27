@@ -79,6 +79,13 @@ npm run seed:demo
 The included scenario is fully synthetic and demonstrates delegation, critique,
 experimentation, evidence, conclusion reversal, and a human decision request.
 
+For a no-terminal workflow, use **Import** in the workbench to choose a JSONL
+event log. Zmind+ validates the complete file in the browser before writing
+bounded batches to the loopback runtime, then opens the imported run
+automatically. **Export** downloads the selected run as portable JSONL. Files up
+to 25 MiB use this one-click flow; the CLI remains available for larger archives
+and automation.
+
 Import a provider-neutral event stream from JSONL (stdin is also supported):
 
 ```bash

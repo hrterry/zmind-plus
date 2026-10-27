@@ -75,3 +75,18 @@ flowchart LR
 5. Import/export controls are keyboard accessible and responsive.
 6. Formatting, type-aware lint, strict TypeScript, unit tests, browser tests,
    production builds, security audit, and public-boundary scan all pass.
+
+## Implementation review
+
+Implemented on the local workbench boundary:
+
+- The shared SDK now creates request batches constrained by both event count and
+  serialized byte size, and owns lossless JSONL serialization.
+- The workbench validates size, schema, one-run scope, start event, and sequence
+  continuity before the first request.
+- Successful imports refresh and open the new run immediately; repeat imports
+  report an idempotent result.
+- Export replays every page through the same contiguous-history guard used by
+  live startup, then creates a filesystem-safe local download.
+- User-facing progress, success, and recovery states are keyboard and
+  screen-reader accessible without exposing raw file content.

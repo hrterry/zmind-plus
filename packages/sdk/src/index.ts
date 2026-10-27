@@ -27,6 +27,9 @@ export interface ZmindClientOptions {
 
 export class ZmindSdkError extends Error {}
 
+export const DEFAULT_APPEND_BODY_BYTES = 900_000;
+export const DEFAULT_APPEND_EVENT_LIMIT = 500;
+
 function validatedEvents(input: readonly unknown[]): ResearchEvent[] {
   if (input.length === 0)
     throw new ZmindSdkError("At least one event is required");
@@ -45,6 +48,50 @@ function validatedEvents(input: readonly unknown[]): ResearchEvent[] {
   }
 
   return events;
+}
+
+export function createResearchEventBatches(
+  events: readonly ResearchEvent[],
+  options: {
+    maxBodyBytes?: number;
+    maxEvents?: number;
+  } = {},
+): ResearchEvent[][] {
+  const maxBodyBytes = options.maxBodyBytes ?? DEFAULT_APPEND_BODY_BYTES;
+  const maxEvents = options.maxEvents ?? DEFAULT_APPEND_EVENT_LIMIT;
+  if (maxBodyBytes < 3 || maxEvents < 1) {
+    throw new ZmindSdkError("Batch limits must be positive");
+  }
+
+  const encoder = new TextEncoder();
+  const batches: ResearchEvent[][] = [];
+  let batch: ResearchEvent[] = [];
+  let batchBytes = 2;
+
+  for (const event of events) {
+    const eventBytes = encoder.encode(JSON.stringify(event)).byteLength;
+    if (eventBytes + 2 > maxBodyBytes) {
+      throw new ZmindSdkError(
+        `Event ${event.sequence} is too large for the local runtime`,
+      );
+    }
+
+    const separatorBytes = batch.length === 0 ? 0 : 1;
+    if (
+      batch.length >= maxEvents ||
+      batchBytes + separatorBytes + eventBytes > maxBodyBytes
+    ) {
+      batches.push(batch);
+      batch = [];
+      batchBytes = 2;
+    }
+
+    batch.push(event);
+    batchBytes += (batch.length === 1 ? 0 : 1) + eventBytes;
+  }
+
+  if (batch.length > 0) batches.push(batch);
+  return batches;
 }
 
 export function parseResearchJsonl(input: string): ResearchEvent[] {
@@ -69,6 +116,12 @@ export function parseResearchJsonl(input: string): ResearchEvent[] {
   return validatedEvents(events);
 }
 
+export function serializeResearchJsonl(input: readonly unknown[]): string {
+  return `${validatedEvents(input)
+    .map((event) => JSON.stringify(event))
+    .join("\n")}\n`;
+}
+
 export class ZmindClient {
   readonly #baseUrl: string;
   readonly #fetcher: typeof fetch;
@@ -78,7 +131,8 @@ export class ZmindClient {
       /\/+$/,
       "",
     );
-    this.#fetcher = options.fetcher ?? fetch;
+    const fetcher = options.fetcher ?? globalThis.fetch;
+    this.#fetcher = (input, init) => fetcher(input, init);
   }
 
   async append(input: readonly unknown[]): Promise<AppendReceipt> {
@@ -92,8 +146,7 @@ export class ZmindClient {
       requests: 0,
     };
 
-    for (let offset = 0; offset < events.length; offset += 500) {
-      const batch = events.slice(offset, offset + 500);
+    for (const batch of createResearchEventBatches(events)) {
       const response = await this.#fetcher(
         `${this.#baseUrl}/api/runs/${encodeURIComponent(runId)}/events`,
         {

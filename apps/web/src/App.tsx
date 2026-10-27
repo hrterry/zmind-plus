@@ -1,4 +1,12 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from "react";
 
 import {
   createGraphView,
@@ -10,6 +18,12 @@ import {
 } from "@zmind-plus/core";
 
 import { useResearchRun } from "./useResearchRun";
+import {
+  downloadText,
+  exportResearchJsonl,
+  importResearchJsonl,
+  portableFilename,
+} from "./dataPortability";
 
 const GraphCanvas = lazy(async () => {
   const module = await import("./GraphCanvas");
@@ -211,7 +225,8 @@ function Inspector({
 }
 
 export function App() {
-  const { events, mode, runs, selectedRunId, selectRun } = useResearchRun();
+  const { events, mode, runs, selectedRunId, selectRun, openRun } =
+    useResearchRun();
   const [visibleCount, setVisibleCount] = useState(events.length);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedId, setSelectedId] = useState<string | undefined>(
@@ -224,6 +239,11 @@ export function App() {
   const [collapsedNodeIds, setCollapsedNodeIds] = useState<Set<string>>(
     () => new Set(),
   );
+  const [transferNotice, setTransferNotice] = useState<{
+    kind: "working" | "success" | "error";
+    message: string;
+  }>();
+  const fileInput = useRef<HTMLInputElement>(null);
 
   const visibleEvents = useMemo(
     () => events.slice(0, visibleCount),
@@ -286,6 +306,8 @@ export function App() {
     );
   }, [projection, selectedId]);
   const activeAgents = [...projection.agents.values()];
+  const selectedRun = runs.find((run) => run.id === selectedRunId);
+  const isTransferring = transferNotice?.kind === "working";
 
   useEffect(() => {
     if (!isPlaying) setVisibleCount(events.length);
@@ -335,6 +357,56 @@ export function App() {
     setCollapsedNodeIds((current) => new Set(current).add(nodeId));
   }
 
+  async function handleImport(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (file === undefined) return;
+
+    setTransferNotice({
+      kind: "working",
+      message: "Checking and importing this run locally…",
+    });
+    try {
+      const receipt = await importResearchJsonl(file);
+      await openRun(receipt.runId);
+      const outcome =
+        receipt.accepted === 0
+          ? `This run is already here. Opened all ${receipt.duplicates} events.`
+          : `Imported ${receipt.accepted} events and opened the research map.`;
+      setTransferNotice({ kind: "success", message: outcome });
+    } catch (error) {
+      setTransferNotice({
+        kind: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "This file could not be imported. Nothing was changed.",
+      });
+    }
+  }
+
+  async function handleExport() {
+    if (selectedRun === undefined) return;
+    setTransferNotice({
+      kind: "working",
+      message: "Preparing a complete local copy…",
+    });
+    try {
+      const contents = await exportResearchJsonl(selectedRun);
+      downloadText(portableFilename(selectedRun.title), contents);
+      setTransferNotice({
+        kind: "success",
+        message: "Downloaded a portable JSONL copy of this run.",
+      });
+    } catch {
+      setTransferNotice({
+        kind: "error",
+        message:
+          "The complete run is not available yet. Check the local connection and try again.",
+      });
+    }
+  }
+
   const connectionLabel = {
     connecting: "Connecting to local runtime…",
     live: "Live from local runtime",
@@ -375,11 +447,60 @@ export function App() {
         </div>
 
         <div className="top-actions">
+          <input
+            ref={fileInput}
+            className="visually-hidden"
+            type="file"
+            accept=".jsonl,application/x-ndjson,application/json"
+            onChange={(event) => void handleImport(event)}
+            tabIndex={-1}
+          />
+          <button
+            className="primary-button data-button"
+            type="button"
+            disabled={isTransferring}
+            onClick={() => fileInput.current?.click()}
+          >
+            <span>＋</span> Import
+          </button>
+          <button
+            className="ghost-button data-button"
+            type="button"
+            disabled={selectedRun === undefined || isTransferring}
+            onClick={() => void handleExport()}
+          >
+            <span>↓</span> Export
+          </button>
           <button className="ghost-button" onClick={replay} type="button">
             <span>↻</span> Replay
           </button>
         </div>
       </header>
+
+      {transferNotice !== undefined && (
+        <div
+          className={`transfer-notice notice-${transferNotice.kind}`}
+          role={transferNotice.kind === "error" ? "alert" : "status"}
+        >
+          <span aria-hidden="true">
+            {transferNotice.kind === "working"
+              ? "…"
+              : transferNotice.kind === "success"
+                ? "✓"
+                : "!"}
+          </span>
+          <strong>{transferNotice.message}</strong>
+          {transferNotice.kind !== "working" && (
+            <button
+              type="button"
+              aria-label="Dismiss notification"
+              onClick={() => setTransferNotice(undefined)}
+            >
+              ×
+            </button>
+          )}
+        </div>
+      )}
 
       <section className="attention-bar">
         <div>

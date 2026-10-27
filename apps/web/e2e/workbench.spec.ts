@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+
 import { expect, test } from "@playwright/test";
 
 import { syntheticResearchEvents } from "@zmind-plus/core";
@@ -137,4 +139,104 @@ test("loads the real graph and keeps branch navigation understandable", async ({
     path: "test-results/workbench-synthetic.png",
     fullPage: true,
   });
+});
+
+test("imports and exports a complete run without leaving the workbench", async ({
+  page,
+}) => {
+  const runId = "run-browser-import";
+  const events = syntheticResearchEvents.map((event) => ({
+    ...event,
+    runId,
+    id: `browser-${event.id}`,
+    ...(event.type === "run.started"
+      ? {
+          payload: {
+            title: "Imported browser research",
+            objective: "Prove one-click local portability",
+          },
+        }
+      : {}),
+  }));
+  let imported = false;
+
+  await page.route("**/api/runs", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        runs: imported
+          ? [
+              {
+                id: runId,
+                title: "Imported browser research",
+                objective: "Prove one-click local portability",
+                updatedAt: "2026-10-27T02:00:00.000Z",
+                lastSequence: events.length - 1,
+              },
+            ]
+          : [],
+      }),
+    });
+  });
+  await page.route(`**/api/runs/${runId}/events**`, async (route) => {
+    if (route.request().method() === "POST") {
+      imported = true;
+      const batch = route.request().postDataJSON() as unknown[];
+      await route.fulfill({
+        status: 202,
+        contentType: "application/json",
+        body: JSON.stringify({
+          accepted: batch.length,
+          duplicates: 0,
+          lastSequence: batch.length - 1,
+        }),
+      });
+      return;
+    }
+    const requestUrl = new URL(route.request().url());
+    const after = Number(requestUrl.searchParams.get("after") ?? "-1");
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        events: events.filter((event) => event.sequence > after),
+      }),
+    });
+  });
+  await page.route(`**/api/runs/${runId}/stream**`, async (route) => {
+    await route.fulfill({
+      contentType: "text/event-stream",
+      body: ": connected\n\n",
+    });
+  });
+
+  await page.goto("/workbench");
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "research.jsonl",
+    mimeType: "application/x-ndjson",
+    buffer: Buffer.from(
+      events.map((event) => JSON.stringify(event)).join("\n"),
+    ),
+  });
+
+  await expect(page.getByText(/Imported \d+ events/)).toBeVisible();
+  await expect(
+    page.getByText("Prove one-click local portability"),
+  ).toBeVisible();
+
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: /Export/ }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe("imported-browser-research.jsonl");
+  const downloadPath = await download.path();
+  if (downloadPath === null)
+    throw new Error("The browser download has no path");
+  const downloadedEvents = (await readFile(downloadPath, "utf8"))
+    .trim()
+    .split("\n")
+    .map((line) => JSON.parse(line) as { runId: string });
+  expect(downloadedEvents).toHaveLength(events.length);
+  expect(downloadedEvents.every((event) => event.runId === runId)).toBe(true);
+  await expect(
+    page.getByText("Downloaded a portable JSONL copy"),
+  ).toBeVisible();
 });
