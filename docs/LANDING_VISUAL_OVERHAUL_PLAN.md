@@ -1,6 +1,6 @@
 # Landing Visual Overhaul Plan
 
-Status: In progress on `codex/landing-visual-overhaul`.
+Status: Implemented and verified on `codex/landing-visual-overhaul`.
 
 ## Outcome
 
@@ -35,15 +35,15 @@ flowchart TD
 
 ## Design decisions
 
-| Area | Decision | Why |
-| --- | --- | --- |
-| Visual direction | Dark research command center with warm editorial surfaces | Makes the graph feel like the product rather than an illustration |
-| Hero | Full-viewport composition with a large readable graph and live activity rail | Demonstrates the core idea before asking the visitor to scroll |
-| Motion | Purposeful node, edge, status, and chapter transitions | Shows changing research state without decorative noise |
-| Narrative | Keep five stages, but make the active stage visually dominant | Visitors can understand the product in one pass |
-| Proof | Replace generic whitespace with evidence, reversal, and human-decision moments | Product value becomes concrete |
-| Mobile | Collapse secondary chrome, use horizontal chapter controls, reduce section heights | Avoid the current excessively long and miniature layout |
-| Accessibility | Visible focus, semantic controls, reduced-motion final state, readable contrast | The cinematic direction remains usable |
+| Area             | Decision                                                                           | Why                                                               |
+| ---------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Visual direction | Dark research command center with warm editorial surfaces                          | Makes the graph feel like the product rather than an illustration |
+| Hero             | Full-viewport composition with a large readable graph and live activity rail       | Demonstrates the core idea before asking the visitor to scroll    |
+| Motion           | Purposeful node, edge, status, and chapter transitions                             | Shows changing research state without decorative noise            |
+| Narrative        | Keep five stages, but make the active stage visually dominant                      | Visitors can understand the product in one pass                   |
+| Proof            | Replace generic whitespace with evidence, reversal, and human-decision moments     | Product value becomes concrete                                    |
+| Mobile           | Collapse secondary chrome, use horizontal chapter controls, reduce section heights | Avoid the current excessively long and miniature layout           |
+| Accessibility    | Visible focus, semantic controls, reduced-motion final state, readable contrast    | The cinematic direction remains usable                            |
 
 ## Delivery phases
 
@@ -63,3 +63,14 @@ flowchart TD
 - No horizontal overflow at 390 px, 768 px, or 1440 px.
 - Public-demo mode still makes no runtime API requests.
 - `/workbench` behavior is unchanged.
+
+## Verification record
+
+- Reviewed full-page and first-viewport captures at 1440 × 1000, 768 × 900,
+  and 390 × 844.
+- Confirmed the document width matches the viewport at every review size.
+- Reduced the 390 px page height from approximately 7,300 px to 6,143 px while
+  retaining the complete story.
+- Passed formatting, lint, workspace type checks, 52 unit/integration tests,
+  six browser tests, the Vercel production-preview test, the 1k/5k/20k graph
+  benchmark, the public-boundary check, and the forbidden-content scan.
