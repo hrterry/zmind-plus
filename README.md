@@ -9,6 +9,10 @@ reading every token.
 
 > See every hypothesis. Challenge every conclusion.
 
+[**Explore the live demo**](https://zmind-plus.vercel.app) ·
+[**Open the interactive workbench**](https://zmind-plus.vercel.app/workbench) ·
+[Self-host Zmind+](#self-host-with-docker)
+
 [![Zmind+ product film](docs/assets/zmind-plus-poster.png)](docs/assets/zmind-plus-demo.mp4)
 
 _Watch the 30-second product film: delegation, adversarial review, experiment,
@@ -45,7 +49,9 @@ The default view answers three questions:
 
 ## Project status
 
-Zmind+ now includes a runnable local workbench, immutable typed event protocol,
+The [public demo](https://zmind-plus.vercel.app) is live, including an
+[interactive synthetic workbench](https://zmind-plus.vercel.app/workbench).
+Zmind+ also includes a runnable local workbench, immutable typed event protocol,
 SQLite persistence, replayable live updates, a provider-neutral import SDK, and
 an optional privacy-safe Claude Code lifecycle adapter. The workbench switches
 between a spatial graph and a source-addressed structured brief for fast linear
@@ -63,7 +69,6 @@ Requirements: Node.js 24 or newer.
 ```bash
 git clone https://github.com/hrterry/zmind-plus.git
 cd zmind-plus
-git switch codex/foundation
 npm install
 npm run dev
 ```
@@ -150,10 +155,15 @@ placing Zmind+ behind another local origin.
 
 ### Publish the public demo on Vercel
 
-Import this GitHub repository into Vercel and leave **Root Directory** at the
-repository root. The checked-in `vercel.json` installs the workspace, builds
-the Vite web application, publishes `apps/web/dist`, and preserves direct
-navigation to `/workbench`.
+The public deployment is available at
+[zmind-plus.vercel.app](https://zmind-plus.vercel.app), with the interactive
+workbench at
+[zmind-plus.vercel.app/workbench](https://zmind-plus.vercel.app/workbench).
+
+To publish your own copy, import this GitHub repository into Vercel and leave
+**Root Directory** at the repository root. The checked-in `vercel.json` installs
+the workspace, builds the Vite web application, publishes `apps/web/dist`, and
+preserves direct navigation to `/workbench`.
 
 The Vercel build deliberately runs in public demo mode:
 
