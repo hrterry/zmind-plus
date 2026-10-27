@@ -188,6 +188,7 @@ button {
   color: white;
   background: #17212b;
   box-shadow: 0 6px 18px rgba(23, 33, 43, 0.13);
+  text-decoration: none;
 }
 
 .transfer-notice {

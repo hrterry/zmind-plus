@@ -8,6 +8,7 @@
     "capture:demo": "playwright test --config=playwright.demo.config.ts",
     "dev": "vite",
     "test:e2e": "playwright test",
+    "test:vercel": "playwright test --config=playwright.vercel.config.ts",
     "typecheck": "tsc -b && tsc -p tsconfig.tests.json",
     "test": "vitest run src --passWithNoTests"
   },

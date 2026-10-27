@@ -227,7 +227,7 @@ function Inspector({
 }
 
 export function App() {
-  const { events, mode, runs, selectedRunId, selectRun, openRun } =
+  const { events, mode, runs, selectedRunId, selectRun, openRun, demoOnly } =
     useResearchRun();
   const [visibleCount, setVisibleCount] = useState(events.length);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -404,12 +404,14 @@ export function App() {
     }
   }
 
-  const connectionLabel = {
-    connecting: "Connecting to local runtime…",
-    live: "Live from local runtime",
-    reconnecting: "Reconnecting · showing committed events",
-    demo: "Local synthetic demo",
-  }[mode];
+  const connectionLabel = demoOnly
+    ? "Public synthetic demo · self-host for live data"
+    : {
+        connecting: "Connecting to local runtime…",
+        live: "Live from local runtime",
+        reconnecting: "Reconnecting · showing committed events",
+        demo: "Local synthetic demo",
+      }[mode];
 
   return (
     <main className="app-shell">
@@ -444,30 +446,41 @@ export function App() {
         </div>
 
         <div className="top-actions">
-          <input
-            ref={fileInput}
-            className="visually-hidden"
-            type="file"
-            accept=".jsonl,application/x-ndjson,application/json"
-            onChange={(event) => void handleImport(event)}
-            tabIndex={-1}
-          />
-          <button
-            className="primary-button data-button"
-            type="button"
-            disabled={isTransferring}
-            onClick={() => fileInput.current?.click()}
-          >
-            <span>＋</span> Import
-          </button>
-          <button
-            className="ghost-button data-button"
-            type="button"
-            disabled={selectedRun === undefined || isTransferring}
-            onClick={() => void handleExport()}
-          >
-            <span>↓</span> Export
-          </button>
+          {demoOnly ? (
+            <a
+              className="primary-button data-button"
+              href="https://github.com/hrterry/zmind-plus#self-host-with-docker"
+            >
+              Self-host <span>↗</span>
+            </a>
+          ) : (
+            <>
+              <input
+                ref={fileInput}
+                className="visually-hidden"
+                type="file"
+                accept=".jsonl,application/x-ndjson,application/json"
+                onChange={(event) => void handleImport(event)}
+                tabIndex={-1}
+              />
+              <button
+                className="primary-button data-button"
+                type="button"
+                disabled={isTransferring}
+                onClick={() => fileInput.current?.click()}
+              >
+                <span>＋</span> Import
+              </button>
+              <button
+                className="ghost-button data-button"
+                type="button"
+                disabled={selectedRun === undefined || isTransferring}
+                onClick={() => void handleExport()}
+              >
+                <span>↓</span> Export
+              </button>
+            </>
+          )}
           <button className="ghost-button" onClick={replay} type="button">
             <span>↻</span> Replay
           </button>

@@ -61,3 +61,16 @@ flowchart LR
 5. The container job verifies both the proxied runtime health endpoint and the
    rendered landing-page shell.
 6. The workflow is pushed, observed to completion, and only then merged.
+
+## Implementation review
+
+- Root-level Vercel configuration builds only the web workspace and publishes
+  `apps/web/dist` with an SPA fallback for `/workbench`.
+- A compile-time public-demo boundary prevents run discovery, replay fetches,
+  and SSE connections rather than relying on failed network requests.
+- Public mode replaces the nonfunctional Import/Export controls with one honest
+  Self-host action; the local build retains full data portability.
+- A dedicated production-preview browser test opens `/workbench` directly,
+  waits beyond the normal discovery interval, and proves zero runtime requests.
+- CI includes type-aware lint and the Vercel-mode browser contract in addition
+  to the existing quality, scale, privacy, and container gates.

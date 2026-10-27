@@ -24,6 +24,7 @@
     "lint": "oxlint . --type-aware --deny-warnings --report-unused-disable-directives",
     "test": "npm run test --workspaces --if-present",
     "test:e2e": "npm run test:e2e --workspace=@zmind-plus/web",
+    "test:vercel": "npm run test:vercel --workspace=@zmind-plus/web",
     "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "engines": {

@@ -85,11 +85,15 @@ export async function fetchResearchEventHistory(
   return events;
 }
 
-export function useResearchRun() {
+export function useResearchRun(options?: { demoOnly?: boolean }) {
+  const demoOnly =
+    options?.demoOnly ?? import.meta.env.VITE_ZMIND_DEMO_ONLY === "true";
   const [events, setEvents] = useState<ResearchEvent[]>(
     syntheticResearchEvents,
   );
-  const [mode, setMode] = useState<ConnectionMode>("connecting");
+  const [mode, setMode] = useState<ConnectionMode>(
+    demoOnly ? "demo" : "connecting",
+  );
   const [runs, setRuns] = useState<RunSummary[]>([]);
   const [selectedRunId, setSelectedRunId] = useState<string>();
   const [connectionRevision, setConnectionRevision] = useState(0);
@@ -128,6 +132,7 @@ export function useResearchRun() {
   );
 
   useEffect(() => {
+    if (demoOnly) return;
     const controller = new AbortController();
     async function pollRuns() {
       try {
@@ -145,10 +150,10 @@ export function useResearchRun() {
       controller.abort();
       window.clearInterval(poll);
     };
-  }, [discoverRuns]);
+  }, [demoOnly, discoverRuns]);
 
   useEffect(() => {
-    if (selectedRunId === undefined) return;
+    if (demoOnly || selectedRunId === undefined) return;
     const activeRunId = selectedRunId;
     const controller = new AbortController();
     let stream: EventSource | undefined;
@@ -199,7 +204,7 @@ export function useResearchRun() {
       controller.abort();
       stream?.close();
     };
-  }, [connectionRevision, selectedRunId]);
+  }, [connectionRevision, demoOnly, selectedRunId]);
 
   function selectRun(runId: string) {
     manualSelection.current = true;
@@ -210,5 +215,5 @@ export function useResearchRun() {
     await discoverRuns(undefined, runId);
   }
 
-  return { events, mode, runs, selectedRunId, selectRun, openRun };
+  return { events, mode, runs, selectedRunId, selectRun, openRun, demoOnly };
 }

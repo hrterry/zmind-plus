@@ -148,6 +148,26 @@ runtime container. SQLite persists in the `zmind-data` volume. Override the host
 port with `ZMIND_PORT`, or supply a comma-separated `ZMIND_UI_ORIGINS` when
 placing Zmind+ behind another local origin.
 
+### Publish the public demo on Vercel
+
+Import this GitHub repository into Vercel and leave **Root Directory** at the
+repository root. The checked-in `vercel.json` installs the workspace, builds
+the Vite web application, publishes `apps/web/dist`, and preserves direct
+navigation to `/workbench`.
+
+The Vercel build deliberately runs in public demo mode:
+
+- `/` contains the complete landing page and animated five-act product story;
+- `/workbench` contains the synthetic Graph, Brief, inspector, and replay;
+- no browser request is made to a nonexistent cloud runtime;
+- Import is replaced with a Self-host action so the demo does not imply that
+  private research is persisted on Vercel.
+
+Use Docker or the local Node.js runtime for live Claude Code hooks, MCP tools,
+JSONL ingestion, SSE updates, and SQLite persistence. The public demo and local
+product share the same UI source but have intentionally different data
+boundaries.
+
 Quality checks:
 
 ```bash

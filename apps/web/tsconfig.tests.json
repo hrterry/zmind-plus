@@ -7,7 +7,9 @@
   "include": [
     "demo/**/*.ts",
     "e2e/**/*.ts",
+    "vercel-e2e/**/*.ts",
     "playwright.config.ts",
-    "playwright.demo.config.ts"
+    "playwright.demo.config.ts",
+    "playwright.vercel.config.ts"
   ]
 }
